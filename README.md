@@ -22,8 +22,13 @@ project uses `go mod` even if it is inside the `GOPATH`.
 go mod init github.com/crixo/k8s-as-backend
 ```
 - ```go get k8s.io/code-generator```
+- ```go get k8s.io/client-go@kubernetes-1.16.3```
 - ```go mod vendor```
+- ```sh ./hack/verify-codegen.sh ``` (optional)
 - ```sh ./hack/update-codegen.sh ```
+
+### reference
+- https://github.com/kubernetes/code-generator
 
 ## Generate code old
 Checkout the project in your GOPATH because `code-generator` still uses
