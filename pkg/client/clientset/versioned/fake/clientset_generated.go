@@ -19,9 +19,9 @@ limitations under the License.
 package fake
 
 import (
-	clientset "github.com/crixo/k8s-as-backend/pkg/generated/clientset/versioned"
-	k8sasbackendv1 "github.com/crixo/k8s-as-backend/pkg/generated/clientset/versioned/typed/k8sasbackend/v1"
-	fakek8sasbackendv1 "github.com/crixo/k8s-as-backend/pkg/generated/clientset/versioned/typed/k8sasbackend/v1/fake"
+	clientset "github.com/crixo/k8s-as-backend/pkg/client/clientset/versioned"
+	k8sasbackendv1 "github.com/crixo/k8s-as-backend/pkg/client/clientset/versioned/typed/k8sasbackend/v1"
+	fakek8sasbackendv1 "github.com/crixo/k8s-as-backend/pkg/client/clientset/versioned/typed/k8sasbackend/v1/fake"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/discovery"

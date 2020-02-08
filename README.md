@@ -21,11 +21,32 @@ project uses `go mod` even if it is inside the `GOPATH`.
 ```
 go mod init github.com/crixo/k8s-as-backend
 ```
-- ```go get k8s.io/code-generator```
-- ```go get k8s.io/client-go@kubernetes-1.16.3```
-- ```go mod vendor```
-- ```sh ./hack/verify-codegen.sh ``` (optional)
-- ```sh ./hack/update-codegen.sh ```
+- create autogenerate client
+```
+go get k8s.io/code-generator
+go get k8s.io/client-go@kubernetes-1.16.3
+go mod vendor
+# optional - # sh ./hack/verify-codegen.sh ``` (optional)
+sh ./hack/update-codegen.sh 
+```
+
+- write biz logic code
+
+- re-vendoring adding vendor code-related
+```
+go mod vendor
+```
+
+- build the docker image
+```
+docker build -t crixo/k8s-as-backend .
+```
+
+- laod image in kind
+```
+docker tag crixo/k8s-as-backend crixo/k8s-as-backend:kind
+kind load docker-image crixo/k8s-as-backend:kind --name standard
+```
 
 ### reference
 - https://github.com/kubernetes/code-generator

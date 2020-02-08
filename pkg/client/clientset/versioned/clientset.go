@@ -21,7 +21,7 @@ package versioned
 import (
 	"fmt"
 
-	k8sasbackendv1 "github.com/crixo/k8s-as-backend/pkg/generated/clientset/versioned/typed/k8sasbackend/v1"
+	k8sasbackendv1 "github.com/crixo/k8s-as-backend/pkg/client/clientset/versioned/typed/k8sasbackend/v1"
 	discovery "k8s.io/client-go/discovery"
 	rest "k8s.io/client-go/rest"
 	flowcontrol "k8s.io/client-go/util/flowcontrol"

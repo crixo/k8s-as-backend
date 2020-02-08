@@ -20,7 +20,7 @@ package v1
 
 import (
 	v1 "github.com/crixo/k8s-as-backend/pkg/apis/k8sasbackend/v1"
-	"github.com/crixo/k8s-as-backend/pkg/generated/clientset/versioned/scheme"
+	"github.com/crixo/k8s-as-backend/pkg/client/clientset/versioned/scheme"
 	rest "k8s.io/client-go/rest"
 )
 

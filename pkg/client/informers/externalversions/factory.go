@@ -23,9 +23,9 @@ import (
 	sync "sync"
 	time "time"
 
-	versioned "github.com/crixo/k8s-as-backend/pkg/generated/clientset/versioned"
-	internalinterfaces "github.com/crixo/k8s-as-backend/pkg/generated/informers/externalversions/internalinterfaces"
-	k8sasbackend "github.com/crixo/k8s-as-backend/pkg/generated/informers/externalversions/k8sasbackend"
+	versioned "github.com/crixo/k8s-as-backend/pkg/client/clientset/versioned"
+	internalinterfaces "github.com/crixo/k8s-as-backend/pkg/client/informers/externalversions/internalinterfaces"
+	k8sasbackend "github.com/crixo/k8s-as-backend/pkg/client/informers/externalversions/k8sasbackend"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"

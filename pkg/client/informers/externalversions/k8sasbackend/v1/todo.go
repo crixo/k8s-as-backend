@@ -22,9 +22,9 @@ import (
 	time "time"
 
 	k8sasbackendv1 "github.com/crixo/k8s-as-backend/pkg/apis/k8sasbackend/v1"
-	versioned "github.com/crixo/k8s-as-backend/pkg/generated/clientset/versioned"
-	internalinterfaces "github.com/crixo/k8s-as-backend/pkg/generated/informers/externalversions/internalinterfaces"
-	v1 "github.com/crixo/k8s-as-backend/pkg/generated/listers/k8sasbackend/v1"
+	versioned "github.com/crixo/k8s-as-backend/pkg/client/clientset/versioned"
+	internalinterfaces "github.com/crixo/k8s-as-backend/pkg/client/informers/externalversions/internalinterfaces"
+	v1 "github.com/crixo/k8s-as-backend/pkg/client/listers/k8sasbackend/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	watch "k8s.io/apimachinery/pkg/watch"

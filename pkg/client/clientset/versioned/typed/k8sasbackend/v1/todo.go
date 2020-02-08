@@ -22,7 +22,7 @@ import (
 	"time"
 
 	v1 "github.com/crixo/k8s-as-backend/pkg/apis/k8sasbackend/v1"
-	scheme "github.com/crixo/k8s-as-backend/pkg/generated/clientset/versioned/scheme"
+	scheme "github.com/crixo/k8s-as-backend/pkg/client/clientset/versioned/scheme"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	types "k8s.io/apimachinery/pkg/types"
 	watch "k8s.io/apimachinery/pkg/watch"

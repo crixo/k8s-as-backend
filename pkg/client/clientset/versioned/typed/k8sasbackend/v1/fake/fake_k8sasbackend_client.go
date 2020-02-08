@@ -19,7 +19,7 @@ limitations under the License.
 package fake
 
 import (
-	v1 "github.com/crixo/k8s-as-backend/pkg/generated/clientset/versioned/typed/k8sasbackend/v1"
+	v1 "github.com/crixo/k8s-as-backend/pkg/client/clientset/versioned/typed/k8sasbackend/v1"
 	rest "k8s.io/client-go/rest"
 	testing "k8s.io/client-go/testing"
 )
