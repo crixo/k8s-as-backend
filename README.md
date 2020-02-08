@@ -13,7 +13,7 @@ project uses `go mod` even if it is inside the `GOPATH`.
 
 
 ## Generate code
-- install go 1.13
+- install or upgrade go 1.13 using homebrew
 - clone starting repo with pkg/apis/GROUP_NAME/VERSION/doc.go,register.go,types.go
 - add the hack w/ all files folder from https://github.com/kubernetes/sample-controller/tree/master/hack
 - adjust the update-codegen.sh with the specific repo reference
