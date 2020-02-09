@@ -3,7 +3,7 @@
 ## How to apply additional/server-side-coding validataion to a CRD before it will be persisted in etcd
 
 - https://banzaicloud.com/blog/k8s-admission-webhooks/
-  - [banzai sample](https://banzaicloud.com/blog/k8s-admission-webhooks/)
+  - [banzai sample](https://github.com/banzaicloud/admission-webhook-example)
 - [Dynamic Admission Control](https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers)
   - [admission webhook server sample](https://github.com/kubernetes/kubernetes/blob/v1.13.0/test/images/webhook/main.go)
   - [deploy webhook server](https://github.com/kubernetes/kubernetes/blob/v1.15.0/test/e2e/apimachinery/webhook.go#L301)
