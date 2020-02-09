@@ -3,7 +3,10 @@
 ## How to apply additional/server-side-coding validataion to a CRD before it will be persisted in etcd
 
 - https://banzaicloud.com/blog/k8s-admission-webhooks/
-- https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/#admission-webhooks
+  - [banzai sample](https://banzaicloud.com/blog/k8s-admission-webhooks/)
+- [Dynamic Admission Control](https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers)
+  - [admission webhook server sample](https://github.com/kubernetes/kubernetes/blob/v1.13.0/test/images/webhook/main.go)
+  - [deploy webhook server](https://github.com/kubernetes/kubernetes/blob/v1.15.0/test/e2e/apimachinery/webhook.go#L301)
 
 
 ## Dependency Management
@@ -50,6 +53,15 @@ kind load docker-image crixo/k8s-as-backend:kind --name standard
 
 ### reference
 - https://github.com/kubernetes/code-generator
+
+## checks
+- get list of enabled admission controller
+https://stackoverflow.com/questions/51489955/how-to-obtain-the-enable-admission-controller-list-in-kubernetes
+```in console on the control-plane
+cat /etc/kubernetes/manifests/kube-apiserver.yaml
+```
+kubectl -n kube-system describe po kube-apiserver-YOUR-CLUSTER_NAME_REF  
+```
 
 ## Generate code old
 Checkout the project in your GOPATH because `code-generator` still uses

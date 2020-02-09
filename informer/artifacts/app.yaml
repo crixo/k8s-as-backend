@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: todo-crd
+  labels:
+    app: todo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: todo
+  template:
+    metadata:
+      labels:
+        app: todo
+    spec:
+      serviceAccountName: todo-crd
+      containers:
+      - name: todo
+        image: crixo/k8s-as-backend-informer:v.0.0.0
+        env:
+          - name: USER
+            value: /root
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: todo-crd
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: todo-crd
+subjects:
+- kind: ServiceAccount
+  name: todo-crd
+  namespace: default
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: todo-crd
+  namespace: default
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: todo-crd
+rules:
+  - apiGroups: ['k8sasbackend.com']
+    resources: ["todo", "todos"]
+    verbs: ["get", "list", "delete", "watch", "update"]
