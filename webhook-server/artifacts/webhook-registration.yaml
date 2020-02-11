@@ -11,6 +11,7 @@ webhooks:
     resources:   ["todos"]
     scope:       "Namespaced"
   clientConfig:
+    #url: "https://admission-webhook-example-svc.default.svc:443/crd"
     service:
       namespace: "default"
       name: "admission-webhook-example-svc"
