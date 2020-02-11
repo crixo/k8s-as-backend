@@ -1,4 +1,7 @@
 
+## CRD tutorial
+- [gianarb/todo-crd](https://github.com/gianarb/todo-crd)
+- [Extending Kubernetes](https://get.oreilly.com/ind_extending-kubernetes.html)
 
 ## How to apply additional/server-side-coding validataion to a CRD before it will be persisted in etcd
 

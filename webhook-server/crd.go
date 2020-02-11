@@ -17,8 +17,13 @@ limitations under the License.
 package main
 
 import (
+	"go.uber.org/zap"
 	v1 "k8s.io/api/admission/v1"
 	"k8s.io/klog"
+)
+
+var (
+	logger = zap.NewExample()
 )
 
 
@@ -35,6 +40,8 @@ func admitCRD(ar v1.AdmissionReview) *v1.AdmissionResponse {
 
 	raw := ar.Request.Object.Raw
 	klog.V(2).Info(raw)
+
+	logger.With(zap.String("raw", string(raw))).Info("ar.Request.Object.Raw")
 	// var labels map[string]string
 
 	// switch ar.Request.Resource {

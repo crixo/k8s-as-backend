@@ -3,6 +3,7 @@ module github.com/crixo/k8s-as-backend/webhook-server
 go 1.13
 
 require (
+	go.uber.org/zap v0.0.0-20180814183419-67bc79d13d15
 	k8s.io/api v0.0.0-20200131112707-d64dbec685a4
 	k8s.io/apiextensions-apiserver v0.0.0-00010101000000-000000000000 // indirect
 	k8s.io/apimachinery v0.0.0-20200131112342-0c9ec93240c9
