@@ -45,6 +45,11 @@ go mod vendor
 docker build -t crixo/k8s-as-backend .
 ```
 
+- create cluster
+```
+kind create cluster --name standard
+```
+
 - laod image in kind
 ```
 docker tag crixo/k8s-as-backend crixo/k8s-as-backend:kind

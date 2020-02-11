@@ -28,13 +28,14 @@ import (
 	"k8s.io/api/admission/v1beta1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/klog"
+
 	// TODO: try this library to see if it generates correct json patch
 	// https://github.com/mattbaird/jsonpatch
 
 	//crd.go
 	// apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	// apiextensionsv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
-	
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	admissionv1 "k8s.io/api/admission/v1"
@@ -44,9 +45,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
-
 	//"github.com/crixo/k8s-as-backend/webhook-server/main"
-	
 )
 
 var (
@@ -73,7 +72,7 @@ func init() {
 	// 	"File containing the default x509 private key matching --tls-cert-file.")
 	// CmdWebhook.Flags().IntVar(&port, "port", 443,
 	// 	"Secure port that the webhook listens on")
-	port = 80
+	port = 443
 }
 
 // admitv1beta1Func handles a v1beta1 admission
@@ -179,19 +178,23 @@ func serveCRD(w http.ResponseWriter, r *http.Request) {
 	serve(w, r, newDelegateToV1AdmitHandler(admitCRD))
 }
 
+func test(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("Hello"))
+}
+
 func main() {//cmd *cobra.Command, args []string
-	// config := Config{
-	// 	CertFile: certFile,
-	// 	KeyFile:  keyFile,
-	// }
+	config := Config{
+		CertFile: "/etc/webhook/certs/cert.pem",//certFile,
+		KeyFile:  "/etc/webhook/certs/key.pem",//keyFile,
+	}
 
 	http.HandleFunc("/crd", serveCRD)
+	http.HandleFunc("/test", test)
 	server := &http.Server{
 		Addr:      fmt.Sprintf(":%d", port),
-		//TLSConfig: configTLS(config),
+		TLSConfig: configTLS(config),
 	}
-	//err := server.ListenAndServeTLS("", "")
-	err := server.ListenAndServe()
+	err := server.ListenAndServeTLS("", "")
 	if err != nil {
 		panic(err)
 	}
