@@ -32,3 +32,28 @@ Name: "buy-book", Namespace: "default"
 Object: &{map["apiVersion":"k8sasbackend.com/v1" "kind":"Todo" "metadata":map["annotations":map["kubectl.kubernetes.io/last-applied-configuration":"{\"apiVersion\":\"k8sasbackend.com/v1\",\"kind\":\"Todo\",\"metadata\":{\"annotations\":{},\"name\":\"buy-book\",\"namespace\":\"default\"},\"spec\":{\"message\":\"Remember to buy a book about cloud on Amazon upd8.\",\"when\":\"2019-05-13T21:02:21Z\"}}\n"] "creationTimestamp":"2020-02-10T23:36:40Z" "generation":'\x01' "name":"buy-book" "namespace":"default" "resourceVersion":"640" "selfLink":"/apis/k8sasbackend.com/v1/namespaces/default/todos/buy-book" "uid":"f9076dd8-76fc-4a84-ad95-4783ed3d676d"] "spec":map["message":"Remember to buy a book about cloud on Amazon upd8." "when":"2019-05-13T21:02:21Z"]]}
 for: "artifacts/todo.yaml": Internal error occurred: failed calling webhook "pod-policy.example.com": Post https://admission-webhook-example-svc.default.svc:443/crd?timeout=5s: dial tcp: lookup admission-webhook-example-svc.default.svc on 192.168.65.1:53: no such host
 ```
+
+## Fix service vs host
+https://app.slack.com/client/T09NY5SBT/CEKK1KTN2/thread/CEKK1KTN2-1581412058.305100
+aojea  11 minutes ago
+@neolit123 I think that kubeaedm deploy the apiserver with hostNetwork= true and  is not using `
+  dnsPolicy: ClusterFirstWithHostNet
+ thus it will use the name resolution configured in the node
+
+aojea  10 minutes ago
+@crixo using `  dnsPolicy: ClusterFirstWithHostNet` for the apiserver should work for you, can you try? the pod definition is stored in /etc/kubernetes/manifests/kube-apiserver.yaml
+
+crixo  3 minutes ago
+Hi @aojea thanks for the hint, I'll try it tonight and I let you know. How can I add that setting with the kind configuration? I'm not seeing as a flag for the kube-apiserver (https://kubernetes.io/docs/reference/command-line-tools-reference/kube-apiserver/). Should I change the file in the running pod? (edited) 
+
+aojea  3 minutes ago
+those are deployed by kubeadm using static pod manifests, I tagged kubeadm people if that's by design (edited) 
+
+aojea  2 minutes ago
+modifying the file directly is ok, the pod will restart with the new config once the file is saved
+:heavy_check_mark:
+1
+
+
+aojea  2 minutes ago
+dnsPolicy: ClusterFirstWithHostNet is a field of the pod.Spec IIRC
