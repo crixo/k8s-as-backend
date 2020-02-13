@@ -12,6 +12,12 @@
   - [deploy webhook server](https://github.com/kubernetes/kubernetes/blob/v1.15.0/test/e2e/apimachinery/webhook.go#L301)
 
 
+## Publish k8s events programmatically
+https://kubernetes.io/blog/2018/01/reporting-errors-using-kubernetes-events/
+https://github.com/box/error-reporting-with-kubernetes-events
+https://kubernetes.slack.com/archives/C0X2V69D0/p1581605535010200
+
+
 ## Dependency Management
 The project uses `go mod` but it is requited by `code-generator` for the project
 to be in the `GOPATH`. You should export `GO111MODULE=on` to be sure that the
