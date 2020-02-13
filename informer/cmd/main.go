@@ -5,16 +5,26 @@ import (
 	"fmt"
 	"os/user"
 	"path/filepath"
+	"strings"
 	"time"
 
+	todov1 "github.com/crixo/k8s-as-backend/library/pkg/apis/k8sasbackend/v1"
 	clientset "github.com/crixo/k8s-as-backend/library/pkg/client/clientset/versioned"
 	todoInformers "github.com/crixo/k8s-as-backend/library/pkg/client/informers/externalversions"
+	"github.com/golang/glog"
 	"go.uber.org/zap"
+	v1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/runtime"
+	"k8s.io/client-go/kubernetes"
+	typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/client-go/tools/record"
+	"k8s.io/client-go/tools/reference"
 	"k8s.io/client-go/util/workqueue"
+	"k8s.io/kubernetes/pkg/proxy/apis/config/scheme"
 )
 
 var (
@@ -29,6 +39,8 @@ func main() {
 	//queue := workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter())
 	//defer queue.ShutDown()
 	var kubeconfig *string
+
+
 
 	usr, err := user.Current()
 	if err != nil {
@@ -50,6 +62,11 @@ func main() {
 		}
 	}
 
+	kubeClient, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		logger.With(zap.Error(err)).Fatal("Error building kubernetes clientset")
+	}
+
 	todoClient, err := clientset.NewForConfig(config)
 	if err != nil {
 		logger.With(zap.Error(err)).Fatal("Error building clientset")
@@ -62,21 +79,21 @@ func main() {
 			key, err := cache.MetaNamespaceKeyFunc(obj)
 			if err == nil {
 				//queue.Add(key)
-				businessLogicAsync(key, "add")
+				businessLogicAsync(key, "add", todoClient, kubeClient)
 			}
 		},
 		UpdateFunc: func(old interface{}, neww interface{}) {
 			key, err := cache.MetaNamespaceKeyFunc(neww)
 			if err == nil {
 				//queue.Add(key)
-				businessLogicAsync(key, "update")
+				businessLogicAsync(key, "update", todoClient, kubeClient)
 			}
 		},
 		DeleteFunc: func(obj interface{}) {
 			key, err := cache.DeletionHandlingMetaNamespaceKeyFunc(obj)
 			if err == nil {
 				//queue.Add(key)
-				businessLogicAsync(key, "delete")
+				businessLogicAsync(key, "delete", todoClient, kubeClient)
 			}
 		},
 	})
@@ -111,12 +128,36 @@ func businessLogic(key string) error {
 	return nil
 }
 
-func businessLogicAsync(key string, action string) {
+func businessLogicAsync(key string, action string, todoClient *clientset.Clientset, kubeClient *kubernetes.Clientset) {
 	logger.
 	With(
 		zap.String("message_key", key), 
 		zap.String("action", action)).
 	Info("new key received")
+
+	result := strings.Split(key, "/")
+	ns := result[0]
+	name := result[1]
+
+	todo, err := todoClient.K8sasbackendV1().Todos(ns).Get(name, metav1.GetOptions{})
+	if err != nil {
+		logger.Error("error getting the todo")
+	}
+	logger.
+	With(
+		zap.String("crd_name", todo.Name)).
+	Info("crd received")
+
+	recorder := eventRecorder(kubeClient)
+	todov1.AddToScheme(scheme.Scheme)
+	ref, err := reference.GetReference(scheme.Scheme, todo.DeepCopyObject())
+	if err != nil {
+		glog.Fatalf("Could not get reference for pod %v: %v\n",
+		todo.Name, err)
+	}
+	recorder.Event(ref, v1.EventTypeNormal, "Todo CRD changed",
+	fmt.Sprintf("Todo CRD %s has been %s", todo.Name, action))
+
 }
 
 // handleErr checks if an error happened and makes sure we will retry later.
@@ -144,4 +185,17 @@ func handleErr(err error, key interface{}, queue workqueue.RateLimitingInterface
 	// Report to an external entity that, even after several retries, we could not successfully process this key
 	runtime.HandleError(err)
 	logger.With(zap.Error(err)).With(zap.String("message_key", key.(string))).Warn("Dropping message out of the queue")
+}
+
+func eventRecorder(
+	kubeClient *kubernetes.Clientset) record.EventRecorder {
+	eventBroadcaster := record.NewBroadcaster()
+	eventBroadcaster.StartLogging(glog.Infof)
+	eventBroadcaster.StartRecordingToSink(
+		&typedcorev1.EventSinkImpl{
+			Interface: kubeClient.CoreV1().Events("")})
+	recorder := eventBroadcaster.NewRecorder(
+		scheme.Scheme,
+		v1.EventSource{Component: "todos-informer"})
+	return recorder
 }

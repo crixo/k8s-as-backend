@@ -20,6 +20,14 @@ docker build -t crixo/k8s-as-backend-webhook-server:v.0.0.0 .
 kind load docker-image crixo/k8s-as-backend-webhook-server:v.0.0.0 --name standard
 ```
 
+- create and sign certificates
+```
+ sh ./artifacts/webhook-created-signed-cert.sh
+ cd artifacts
+sh ./webhook-patch-ca-bundle.sh
+cd ..
+```
+
 - apply k8s resources
 ```
 k apply -f artifacts/deployment.yaml,artifacts/service.yaml,artifacts/webhook-registration.yaml  
