@@ -1,0 +1,23 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: "pod-policy.example.com"
+webhooks:
+- name: "pod-policy.example.com"
+  rules:
+  - apiGroups:   ["k8sasbackend.com"]
+    apiVersions: ["v1"]
+    operations:  ["*"]
+    resources:   ["todos"]
+    scope:       "Namespaced"
+  clientConfig:
+    #url: "https://admission-webhook-example-svc.default.svc:443/crd"
+    service:
+      namespace: "default"
+      name: "admission-webhook-example-svc"
+      path: /crd
+      port: 443
+    caBundle: ${CA_BUNDLE}
+  admissionReviewVersions: ["v1", "v1beta1"]
+  sideEffects: None
+  timeoutSeconds: 5

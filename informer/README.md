@@ -20,5 +20,5 @@ kind load docker-image crixo/k8s-as-backend-informer:v.0.0.0 --name standard
 
 - apply k8s resources
 ```
-k apply -f artifacts/crd.yaml  artifacts/app.yaml  artifacts/todo.yaml  
+k apply -f artifacts/crd.yaml,artifacts/app.yaml,artifacts/todo.yaml  
 ```
