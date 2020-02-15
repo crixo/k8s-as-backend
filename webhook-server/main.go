@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
 
 	//"github.com/spf13/cobra"
 
@@ -45,13 +46,20 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
+
 	//"github.com/crixo/k8s-as-backend/webhook-server/main"
+
+	"go.uber.org/zap"
 )
 
 var (
 	certFile string
 	keyFile  string
 	port     int
+)
+
+var (
+	logger = zap.NewExample()
 )
 
 // CmdWebhook is used by agnhost Cobra.
@@ -73,6 +81,8 @@ func init() {
 	// CmdWebhook.Flags().IntVar(&port, "port", 443,
 	// 	"Secure port that the webhook listens on")
 	port = 443
+	logger.Info("klog.SetOutput(os.Stdout)")
+	klog.SetOutput(os.Stdout)
 }
 
 // admitv1beta1Func handles a v1beta1 admission

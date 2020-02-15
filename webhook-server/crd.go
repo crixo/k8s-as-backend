@@ -22,9 +22,9 @@ import (
 	"k8s.io/klog"
 )
 
-var (
-	logger = zap.NewExample()
-)
+// var (
+// 	logger = zap.NewExample()
+// )
 
 
 // This function expects all CRDs submitted to it to be apiextensions.k8s.io/v1beta1 or apiextensions.k8s.io/v1.

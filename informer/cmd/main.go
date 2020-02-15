@@ -72,7 +72,7 @@ func main() {
 		logger.With(zap.Error(err)).Fatal("Error building clientset")
 	}
 
-	factory := todoInformers.NewSharedInformerFactory(todoClient, time.Second*30)
+	factory := todoInformers.NewSharedInformerFactory(todoClient, time.Second*30) // 0 disable resync
 	todoInformer := factory.K8sasbackend().V1().Todos().Informer()
 	todoInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: func(obj interface{}) {
