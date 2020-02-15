@@ -24,3 +24,14 @@ k apply -f artifacts/crd.yaml,artifacts/app.yaml
 sleep 10
 k apply -f artifacts/todo.yaml  
 ```
+
+- get resource by rest api call
+```
+k proxy
+# list
+http://127.0.0.1:8001/apis/k8sasbackend.com/v1/todos/
+# list
+curl http://127.0.0.1:8001/apis/k8sasbackend.com/v1/namespaces/default/todos
+# single item
+curl http://127.0.0.1:8001/apis/k8sasbackend.com/v1/namespaces/default/todos/buy-book
+```
