@@ -1,5 +1,6 @@
 # Kubernetes as backend
 
+## Project Scope
 The goals of this project/repo are the followings:
 - Get hands-on with k8s CRD investigating what is needed to use CRD in a real production scenario.
 - Understanding the k8s API model with a special attention to its extensibility
@@ -13,3 +14,8 @@ Goal of this project is to accomplish the scenario described above leveraging on
 ![](images/k8s-as-backend.png?raw=true)
 
 The next goal is collecting the potential issues of this approach, although technically feasible, highlighting the disadvantages and the risks related to it.
+
+## Collaboration
+My current skills on *golang* are very limited. Any contribution to speed up the implementation, suggestions aimed to improve the quality of the code and the repo organization are more then welcome.
+
+I'm currently grabbing existing code samples from [multiple sources](notes.md) to quickly match the goal described above so prove the technical feasibility.
