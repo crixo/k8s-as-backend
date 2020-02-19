@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: todo-app
+  name: todo-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: todo-app
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: todo-app
+    spec:
+      containers:
+      - image: crixo/todo-app:v0.0.0
+        name: todo-app
+        resources: {}
+        env:
+        - name: FullBasePath
+          value: "http://localhost/todo-app"
+        - name: RoutePrefix
+          value: "swagger-ui"
+        - name: RelativeBasePath
+          value: "todo-app"
+        - name: UseSwagger
+          value: "1"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    app: todo-app
+  name: todo-app-svc
+spec:
+  ports:
+  - port: 5000
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: todo-app
+status:
+  loadBalancer: {}
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: example-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /todo-app(/|$)(.*)
+        backend:
+          serviceName: todo-app-svc
+          servicePort: 5000
+---

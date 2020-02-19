@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging;
 namespace TodoApi.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class TodoController : ControllerBase
     {
         private static readonly string[] Summaries = new[]

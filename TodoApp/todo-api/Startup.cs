@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using Serilog;
 
 namespace TodoApi
 {
@@ -45,30 +46,38 @@ namespace TodoApi
 
             //app.UseHttpsRedirection();
 
-            var basePath = Configuration["RouterPrefix"] ?? "";
+            var routePrefix = Configuration["RoutePrefix"] ?? "";
+            var fullBasePath = Configuration["FullBasePath"] ?? "";
+            var relativeBasePath = Configuration["RelativeBasePath"] ?? "";
+            Log.Debug("fullBasePath: {0}", fullBasePath);
+            Log.Debug("relativeBasePath: {0}", relativeBasePath);
 
-            // Enable middleware to serve generated Swagger as a JSON endpoint
-            // https://github.com/domaindrivendev/Swashbuckle.AspNetCore/issues/1173
-            app.UseSwagger(c =>
-                {
-                    c.RouteTemplate = basePath + "/swagger/{documentName}/swagger.json";
-                    c.PreSerializeFilters.Add((swaggerDoc, httpReq) =>
+            var useSwagger = Configuration["UseSwagger"] ?? "0";
+
+            if(useSwagger=="1"){
+                // Enable middleware to serve generated Swagger as a JSON endpoint
+                // https://github.com/domaindrivendev/Swashbuckle.AspNetCore/issues/1173
+                app.UseSwagger(c =>
                     {
-                        swaggerDoc.Servers = new List<OpenApiServer> { 
-                            new OpenApiServer { 
-                                Url = $"{httpReq.Scheme}://{httpReq.Host.Value}/{basePath}" 
-                                } };
-                    });
-                });
+                        // c.RouteTemplate = basePath + "/swagger/{documentName}/swagger.json";
+                        c.PreSerializeFilters.Add((swaggerDoc, httpReq) =>
+                        {
+                            swaggerDoc.Servers = new List<OpenApiServer> { 
+                                new OpenApiServer { 
+                                    Url = $"{httpReq.Scheme}://{httpReq.Host.Value}/{relativeBasePath}" 
+                                    } };
+                        });
+                    }
+                );
 
-            // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.),
-            // specifying the Swagger JSON endpoint.
-            app.UseSwaggerUI(c =>
-            {
-                var bp = string.IsNullOrWhiteSpace(basePath)? "" : "/" + basePath;
-                c.SwaggerEndpoint(bp  + "/swagger/v1/swagger.json", "My API V1");
-                c.RoutePrefix = basePath;
-            });            
+                // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.),
+                // specifying the Swagger JSON endpoint.
+                app.UseSwaggerUI(c =>
+                {
+                    c.SwaggerEndpoint(fullBasePath  + "/swagger/v1/swagger.json", "My API V1");
+                    c.RoutePrefix = routePrefix;
+                });            
+            }
 
             app.UseRouting();
 
