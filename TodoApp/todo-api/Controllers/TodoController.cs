@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using k8s.Models;
+using System.Text;
 
 namespace TodoApi.Controllers
 {
@@ -55,8 +56,56 @@ namespace TodoApi.Controllers
             .ToArray();
         }
 
+
+        [HttpPost()]
+        public async Task<ActionResult<Todo>> CreateTodo(Todo dto)
+        {
+            var crd = new k8s.Models.Todo{
+                ApiVersion = "k8sasbackend.com/v1",
+                Kind = "Todo",
+                Metadata = new V1ObjectMeta{
+                    Name = dto.Code,
+                    NamespaceProperty = "default",
+                },
+                Spec = new TodoSpec{
+                    Message = dto.Message,
+                    When = dto.When.ToUniversalTime()
+                }
+            };
+
+
+            var client = _clientFactory.CreateClient();
+
+            var svc = new k8s.TodoService(client);
+
+            var json = svc.Serialize(crd);
+
+            using var stringContent = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var request = new HttpRequestMessage(
+                HttpMethod.Post,
+                "http://localhost:8080/apis/k8sasbackend.com/v1/namespaces/default/todos");     
+            request.Headers.Add("Accept", "application/json");
+            request.Headers.Add("User-Agent", "TodoApp");
+            request.Content = stringContent;
+
+
+
+            var response = await client.SendAsync(request);
+
+            var responseContent = await response.Content.ReadAsStringAsync();
+            _logger.LogDebug(responseContent);
+            var todoCrd= svc.Convert<k8s.Models.Todo>(responseContent);
+
+            return new Todo{
+                Id = new Guid(todoCrd.Metadata.Uid),
+                Message = todoCrd.Spec.Message, 
+                When = todoCrd.Spec.When.Value, 
+                Code=todoCrd.Metadata.Name};
+        }
+
         [HttpGet()]
-        public async Task<IEnumerable<Todo>> Get()
+        public async Task<IEnumerable<Todo>> GetList()
         {
 
             var request = new HttpRequestMessage(

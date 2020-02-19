@@ -56,6 +56,11 @@ namespace k8s
     {
       return SafeJsonConvert.DeserializeObject<T>(rawJsonContent, DeserializationSettings);
     }     
+
+    public string Serialize(object obj)
+    {
+      return SafeJsonConvert.SerializeObject(obj, SerializationSettings);
+    } 
   }
 
 }
