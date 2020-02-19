@@ -1,7 +1,8 @@
-read -r -p "kind cluster name: " KIND_CLUSTER_NAME
+read -r -p "kind cluster name(k8s-as-backend): " KIND_CLUSTER_NAME
 if [ -z "$KIND_CLUSTER_NAME" ]; then 
-    echo "KIND_CLUSTER_NAME is mandatory"
-    exit
+    # echo "KIND_CLUSTER_NAME is mandatory"
+    # exit
+    KIND_CLUSTER_NAME="k8s-as-backend"
 fi
 
 go mod vendor

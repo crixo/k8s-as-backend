@@ -29,6 +29,8 @@ namespace TodoApi
         {
             services.AddControllers();
 
+            services.AddHttpClient();
+
             // Register the Swagger generator, defining 1 or more Swagger documents
             services.AddSwaggerGen(c =>
             {
