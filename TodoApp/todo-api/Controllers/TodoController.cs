@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace TodoApi.Controllers
@@ -18,9 +20,14 @@ namespace TodoApi.Controllers
 
         private readonly ILogger<TodoController> _logger;
 
-        public TodoController(ILogger<TodoController> logger)
+        public TodoController(ILogger<TodoController> logger, IWebHostEnvironment env, IConfiguration config)
         {
             _logger = logger;
+            _logger.LogDebug(env.EnvironmentName);
+            foreach(var kv in config.AsEnumerable()){
+                _logger.LogDebug("k:{0} - v:{1}", kv.Key, kv.Value);
+            }
+
         }
 
         [HttpGet]
