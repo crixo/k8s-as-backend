@@ -87,6 +87,7 @@ namespace TodoApi.Controllers
                 "http://localhost:8080/apis/k8sasbackend.com/v1/namespaces/default/todos");     
             request.Headers.Add("Accept", "application/json");
             request.Headers.Add("User-Agent", "TodoApp");
+            AddBearerToken(request);
             request.Content = stringContent;
 
 
@@ -113,6 +114,7 @@ namespace TodoApi.Controllers
                 "http://localhost:8080/apis/k8sasbackend.com/v1/namespaces/default/todos");
             request.Headers.Add("Accept", "application/json");
             request.Headers.Add("User-Agent", "TodoApp");
+            AddBearerToken(request);
 
             var client = _clientFactory.CreateClient();
 
@@ -156,6 +158,17 @@ namespace TodoApi.Controllers
             // })
             // .ToArray();
         }       
+
+        private void AddBearerToken(HttpRequestMessage request)
+        {
+            string path = "/var/run/secrets/kubernetes.io/serviceaccount/token";
+            if (System.IO.File.Exists(path))
+            {
+                request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue(
+                    "Bearer",
+                    System.IO.File.ReadAllText(path));
+            }
+        }
 
         
     }
