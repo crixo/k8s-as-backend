@@ -12,4 +12,18 @@ namespace TodoApi
 
         public string Message { get; set; }
     }
+
+    public class ValidateTodoRequest
+    {
+        public string Raw { get; set; }
+    }    
+
+    public class ValidateTodoResponse
+    {
+        public bool Valid { get; set; }
+
+        public string Message { get; set; }
+    }       
+
+
 }

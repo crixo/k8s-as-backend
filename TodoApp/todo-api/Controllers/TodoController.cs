@@ -56,6 +56,14 @@ namespace TodoApi.Controllers
             .ToArray();
         }
 
+        [HttpPost("validate")]
+        public async Task<ActionResult<ValidateTodoResponse>> ValidateTodo(ValidateTodoRequest dto)
+        {
+             _logger.LogDebug(dto.Raw);
+            return new ValidateTodoResponse{Valid=true};
+
+        }
+
 
         [HttpPost()]
         public async Task<ActionResult<Todo>> CreateTodo(Todo dto)

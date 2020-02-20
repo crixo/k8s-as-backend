@@ -1,17 +1,21 @@
-read -r -p "kind cluster name: " KIND_CLUSTER_NAME
+read -r -p "kind cluster name(k8s-as-backend): " KIND_CLUSTER_NAME
 if [ -z "$KIND_CLUSTER_NAME" ]; then 
-    echo "KIND_CLUSTER_NAME is mandatory"
-    exit
+    # echo "KIND_CLUSTER_NAME is mandatory"
+    # exit
+    KIND_CLUSTER_NAME="k8s-as-backend"
 fi
 
-echo "KIND_CLUSTER_NAME: $KIND_CLUSTER_NAME"
-#exit
+read -r -p "build image(y|N):  " BUILD
+if [[ ! $BUILD =~ ^(y)$ ]]; then 
+    BUILD="n"
+fi
 
-go mod vendor
+if [ $BUILD = 'y' ]; then 
+    go mod vendor
+    docker build -t crixo/k8s-as-backend-webhook-server:v.0.0.0 .
+fi
 
-docker build -t crixo/k8s-as-backend-webhook-server:v.0.0.0 .
-
-kind load docker-image crixo/k8s-as-backend-webhook-server:v.0.0.0 --name $KIND_CLUSTER_NAME
+kind load docker-image crixo/k8s-as-backend-webhook-server:v.0.0.0 --name $KIND_CLUSTER_NAME --nodes="k8s-as-backend-worker,k8s-as-backend-worker2"
 
 sh ./artifacts/webhook-created-signed-cert.sh
 cd artifacts

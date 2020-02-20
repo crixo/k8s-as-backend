@@ -17,6 +17,10 @@ limitations under the License.
 package main
 
 import (
+	"bytes"
+	"encoding/json"
+	"net/http"
+
 	"go.uber.org/zap"
 	v1 "k8s.io/api/admission/v1"
 	"k8s.io/klog"
@@ -41,7 +45,32 @@ func admitCRD(ar v1.AdmissionReview) *v1.AdmissionResponse {
 	raw := ar.Request.Object.Raw
 	klog.V(2).Info(raw)
 
-	logger.With(zap.String("raw", string(raw))).Info("ar.Request.Object.Raw")
+	rawJson := string(raw)
+	logger.With(zap.String("raw", rawJson)).Info("ar.Request.Object.Raw")
+
+	host := "http://todo-app-svc:5000"
+	message := map[string]interface{}{
+		"raw": rawJson,
+	}
+
+	bytesRepresentation, err := json.Marshal(message)
+	if err != nil {
+		logger.Error(err.Error())
+	}
+
+	resp, err := http.Post(host+"/api/todo/validate", "application/json", bytes.NewBuffer(bytesRepresentation))
+	if err != nil {
+		logger.Error(err.Error())
+	}
+
+	var result map[string]interface{}
+
+	json.NewDecoder(resp.Body).Decode(&result)
+
+	//log.Println(result)
+
+	logger.With(zap.Any("raw", result)).Info("raw response")
+
 	// var labels map[string]string
 
 	// switch ar.Request.Resource {
