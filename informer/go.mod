@@ -4,7 +4,6 @@ go 1.13
 
 require (
 	github.com/crixo/k8s-as-backend/library v0.0.0
-	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
 	go.uber.org/zap v1.13.0
 	k8s.io/api v0.0.0
 	k8s.io/apimachinery v0.17.2

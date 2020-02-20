@@ -3,15 +3,18 @@ package main
 import (
 	"flag"
 	"fmt"
+	"os"
 	"os/user"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
 	todov1 "github.com/crixo/k8s-as-backend/library/pkg/apis/k8sasbackend/v1"
 	clientset "github.com/crixo/k8s-as-backend/library/pkg/client/clientset/versioned"
 	todoInformers "github.com/crixo/k8s-as-backend/library/pkg/client/informers/externalversions"
-	"github.com/golang/glog"
+
+	//"github.com/golang/glog"
 	"go.uber.org/zap"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -39,8 +42,6 @@ func main() {
 	//queue := workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter())
 	//defer queue.ShutDown()
 	var kubeconfig *string
-
-
 
 	usr, err := user.Current()
 	if err != nil {
@@ -72,7 +73,8 @@ func main() {
 		logger.With(zap.Error(err)).Fatal("Error building clientset")
 	}
 
-	factory := todoInformers.NewSharedInformerFactory(todoClient, time.Second*30) // 0 disable resync
+	defaultResync := getEnvAsInt("INFORMER_RESYNC", 0)
+	factory := todoInformers.NewSharedInformerFactory(todoClient, (time.Second*time.Duration(defaultResync))) // 0 disable resync // time.Second*30
 	todoInformer := factory.K8sasbackend().V1().Todos().Informer()
 	todoInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: func(obj interface{}) {
@@ -104,7 +106,7 @@ func main() {
 	}
 	// for processNextItem(queue) {
 	// }
-	<- stopCh
+	<-stopCh
 }
 
 func processNextItem(queue workqueue.RateLimitingInterface) bool {
@@ -130,10 +132,10 @@ func businessLogic(key string) error {
 
 func businessLogicAsync(key string, action string, todoClient *clientset.Clientset, kubeClient *kubernetes.Clientset) {
 	logger.
-	With(
-		zap.String("message_key", key), 
-		zap.String("action", action)).
-	Info("new key received")
+		With(
+			zap.String("message_key", key),
+			zap.String("action", action)).
+		Info("new key received")
 
 	result := strings.Split(key, "/")
 	ns := result[0]
@@ -144,19 +146,18 @@ func businessLogicAsync(key string, action string, todoClient *clientset.Clients
 		logger.Error("error getting the todo")
 	}
 	logger.
-	With(
-		zap.String("crd_name", todo.Name)).
-	Info("crd received")
+		With(
+			zap.String("crd_name", todo.Name)).
+		Info("crd received")
 
 	recorder := eventRecorder(kubeClient)
 	todov1.AddToScheme(scheme.Scheme)
 	ref, err := reference.GetReference(scheme.Scheme, todo.DeepCopyObject())
 	if err != nil {
-		glog.Fatalf("Could not get reference for pod %v: %v\n",
-		todo.Name, err)
+		//klog.Fatalf("Could not get reference for pod %v: %v\n", todo.Name, err)
+		logger.Error(fmt.Sprintf("Could not get reference for pod %v: %v\n", todo.Name, err))
 	}
-	recorder.Event(ref, v1.EventTypeNormal, "Todo CRD changed",
-	fmt.Sprintf("Todo CRD %s has been %s", todo.Name, action))
+	recorder.Event(ref, v1.EventTypeNormal, "Todo CRD changed", fmt.Sprintf("Todo CRD %s has been %s", todo.Name, action))
 
 }
 
@@ -187,10 +188,11 @@ func handleErr(err error, key interface{}, queue workqueue.RateLimitingInterface
 	logger.With(zap.Error(err)).With(zap.String("message_key", key.(string))).Warn("Dropping message out of the queue")
 }
 
-func eventRecorder(
-	kubeClient *kubernetes.Clientset) record.EventRecorder {
+func eventRecorder(kubeClient *kubernetes.Clientset) record.EventRecorder {
 	eventBroadcaster := record.NewBroadcaster()
-	eventBroadcaster.StartLogging(glog.Infof)
+	// regardless glog o klog I get this error when script runs in k8s
+	// log: exiting because of error: log: cannot create log: open /tmp/main.todo-crd-65f6cfd66b-gpzhj./root.log.INFO.20200220-115404.1: no such file or directory
+	//eventBroadcaster.StartLogging(klog.Infof)
 	eventBroadcaster.StartRecordingToSink(
 		&typedcorev1.EventSinkImpl{
 			Interface: kubeClient.CoreV1().Events("")})
@@ -198,4 +200,21 @@ func eventRecorder(
 		scheme.Scheme,
 		v1.EventSource{Component: "todos-informer"})
 	return recorder
+}
+
+func getEnv(key string, defaultVal string) string {
+	if value, exists := os.LookupEnv(key); exists {
+return value
+	}
+
+	return defaultVal
+}
+
+func getEnvAsInt(name string, defaultVal int) int {
+	valueStr := getEnv(name, "")
+	if value, err := strconv.Atoi(valueStr); err == nil {
+		return value
+	}
+
+	return defaultVal
 }
