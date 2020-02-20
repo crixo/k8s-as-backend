@@ -87,22 +87,31 @@ namespace TodoApi.Controllers
                 "http://localhost:8080/apis/k8sasbackend.com/v1/namespaces/default/todos");     
             request.Headers.Add("Accept", "application/json");
             request.Headers.Add("User-Agent", "TodoApp");
-            AddBearerToken(request);
+            //AddBearerToken(request);
             request.Content = stringContent;
 
-
-
             var response = await client.SendAsync(request);
-
             var responseContent = await response.Content.ReadAsStringAsync();
             _logger.LogDebug(responseContent);
-            var todoCrd= svc.Convert<k8s.Models.Todo>(responseContent);
+            if (response.IsSuccessStatusCode)
+            {
+                var todoCrd=svc.Convert<k8s.Models.Todo>(responseContent);
 
-            return new Todo{
-                Id = new Guid(todoCrd.Metadata.Uid),
-                Message = todoCrd.Spec.Message, 
-                When = todoCrd.Spec.When.Value, 
-                Code=todoCrd.Metadata.Name};
+                return new Todo{
+                    Id = new Guid(todoCrd.Metadata.Uid),
+                    Message = todoCrd.Spec.Message, 
+                    When = todoCrd.Spec.When.Value, 
+                    Code=todoCrd.Metadata.Name};
+            }
+            else
+            {
+                 var status=svc.Convert<k8s.Models.V1Status>(responseContent);
+                 return BadRequest(new{
+                     message = status.Message,
+                     code = status.Code,
+                     status = status.Status,
+                 });
+            }
         }
 
         [HttpGet()]
@@ -114,7 +123,7 @@ namespace TodoApi.Controllers
                 "http://localhost:8080/apis/k8sasbackend.com/v1/namespaces/default/todos");
             request.Headers.Add("Accept", "application/json");
             request.Headers.Add("User-Agent", "TodoApp");
-            AddBearerToken(request);
+            //AddBearerToken(request);
 
             var client = _clientFactory.CreateClient();
 

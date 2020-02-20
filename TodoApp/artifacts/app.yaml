@@ -36,7 +36,7 @@ spec:
         command:
           - /bin/sh
           - -c 
-          - 'kubectl proxy --token /var/run/secrets/kubernetes.io/serviceaccount/token --port=8080'
+          - 'kubectl proxy --port=8080' #--token /var/run/secrets/kubernetes.io/serviceaccount/token
 ---
 apiVersion: v1
 kind: Service
@@ -73,7 +73,7 @@ spec:
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
-  name: todo-crd
+  name: todo-crd-cluster-admin
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole

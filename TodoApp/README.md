@@ -13,3 +13,10 @@ kubectl proxy --port=8080
 running kubectl as sidecar, if you access the api using ```kubectl proxy --token ... --port 8080``` you need to supply the [bearer token](https://kubernetes.io/docs/tasks/access-application-cluster/access-cluster/#accessing-the-api-from-a-pod) mounted at /var/run/secrets/kubernetes.io/serviceaccount/token
 
 curl -H "Authorization: Bearer from /var/...." http://localhost:8080/api
+
+## direct access from pod to api via k8s service
+TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+curl --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.crt -H "Authorization: Bearer $TOKEN" https://kubernetes.default.svc/api
+
+# cluster browsing
+http://localhost/todo-app/swagger-ui/index.html
