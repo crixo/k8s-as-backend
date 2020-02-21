@@ -18,8 +18,8 @@ fi
 kind load docker-image crixo/k8s-as-backend-webhook-server:v.0.0.0 --name $KIND_CLUSTER_NAME --nodes="k8s-as-backend-worker,k8s-as-backend-worker2"
 
 sh ./artifacts/webhook-created-signed-cert.sh
-cd artifacts
-sh ./webhook-patch-ca-bundle.sh
-cd ..
-
-kubectl apply -f artifacts/deployment.yaml,artifacts/service.yaml,artifacts/webhook-registration.yaml  
+#sh ./artifacts/webhook-patch-ca-bundle.sh
+export CA_BUNDLE=$(kubectl config view --raw -o json | jq -r '.clusters[] | select(.name == "'$(kubectl config current-context)'") | .cluster."certificate-authority-data"')
+export ADMISSION_API_VERSION="admissionregistration.k8s.io/v1"
+kubectl apply -f artifacts/deployment.yaml,artifacts/service.yaml
+envsubst < artifacts/webhook-registration-template.yaml | kubectl apply -f -  

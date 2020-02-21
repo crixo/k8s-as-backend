@@ -1,0 +1,85 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: todo-app
+  name: todo-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: todo-app
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: todo-app
+    spec:
+      serviceAccountName: todo-crd
+      containers:
+      - image: crixo/k8s-as-backend-todo-app
+        name: todo-app
+        resources: {}
+        env:
+        - name: FullBasePath
+          value: "http://demo-k8s-as-backend.westeurope.cloudapp.azure.com/todo-app"
+        - name: RoutePrefix
+          value: "swagger-ui"
+        - name: RelativeBasePath
+          value: "todo-app"
+        - name: UseSwagger
+          value: "1"
+      - image: bitnami/kubectl:1.16
+        name: kubectl
+        command:
+          - /bin/sh
+          - -c 
+          - 'kubectl proxy --port=8080' #--token /var/run/secrets/kubernetes.io/serviceaccount/token
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    app: todo-app
+  name: todo-app-svc
+spec:
+  ports:
+  - port: 5000
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: todo-app
+status:
+  loadBalancer: {}
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: example-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  rules:
+  - host: demo-k8s-as-backend.westeurope.cloudapp.azure.com
+    http:
+      paths:
+      - path: /todo-app(/|$)(.*)
+        backend:
+          serviceName: todo-app-svc
+          servicePort: 5000
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: todo-crd-cluster-admin
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: todo-crd
+  namespace: default
