@@ -21,7 +21,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"os"
 
 	//"github.com/spf13/cobra"
 
@@ -82,7 +81,15 @@ func init() {
 	// 	"Secure port that the webhook listens on")
 	port = 443
 	logger.Info("klog.SetOutput(os.Stdout)")
-	klog.SetOutput(os.Stdout)
+	// klog.SetOutput(os.Stdout)
+	// loggingFlags := &flag.FlagSet{
+	// }
+	// loggingFlags.Set("v","2")
+	// loggingFlags.Set("stderrThreshold", "Info")
+	// klog.InitFlags(loggingFlags)
+	// klog.V(2).Info("init")
+	// klog.Flush()
+	// os.Exit(1)
 }
 
 // admitv1beta1Func handles a v1beta1 admission

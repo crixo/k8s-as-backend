@@ -34,4 +34,8 @@ http://127.0.0.1:8001/apis/k8sasbackend.com/v1/todos/
 curl http://127.0.0.1:8001/apis/k8sasbackend.com/v1/namespaces/default/todos
 # single item
 curl http://127.0.0.1:8001/apis/k8sasbackend.com/v1/namespaces/default/todos/buy-book
+# filter list using filed selector
+http://localhost:8001/apis/k8sasbackend.com/v1/namespaces/default/todos?fieldSelector=metadata.name%3Dbuy-book
+# filter by label
+http://localhost:8001/apis/k8sasbackend.com/v1/namespaces/default/todos?labelSelector=pippo%3Dpluto
 ```
