@@ -47,9 +47,6 @@ envsubst < usage.yaml | kubectl apply -f -
 
 echo "DONE!"
 
-# kubectl config unset "users.clusterUser_$AZURE_RESOURCE_GROUP_$CLUSTER_NAME"
-# kubectl config unset "contexts.$CLUSTER_NAME"
-# kubectl config unset "clusters.$CLUSTER_NAME"
 
 # ode=0 -- Original Error: Code="PublicIPAndLBSkuDoNotMatch" Message="Basic sku load balancer /subscriptions/300aa066-33d1-4cd8-9cac-ef9082a33e4b/resourceGroups/mc_test-cri_k8s-as-backend_weste
 # urope/providers/Microsoft.Network/loadBalancers/kubernetes cannot reference Standard sku publicIP /subscriptions/300aa066-33d1-4cd8-9cac-ef9082a33e4b/resourceGroups/MC_test-cri_k8s-as-backend
