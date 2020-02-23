@@ -20,6 +20,10 @@ spec:
       containers:
       - image: crixo/k8s-as-backend-webhook-server:v.0.0.0
         name: k8s-as-backend-webhook-server
+        args:
+          - -tls-cert-file=/etc/webhook/certs/cert.pem
+          - -tls-private-key-file=/etc/webhook/certs/key.pem
+          - -v=2
         volumeMounts:
           - name: webhook-certs
             mountPath: /etc/webhook/certs

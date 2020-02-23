@@ -18,9 +18,11 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
 
 	//"github.com/spf13/cobra"
 
@@ -73,23 +75,7 @@ var (
 // }
 
 func init() {
-	// CmdWebhook.Flags().StringVar(&certFile, "tls-cert-file", "",
-	// 	"File containing the default x509 Certificate for HTTPS. (CA cert, if any, concatenated after server cert).")
-	// CmdWebhook.Flags().StringVar(&keyFile, "tls-private-key-file", "",
-	// 	"File containing the default x509 private key matching --tls-cert-file.")
-	// CmdWebhook.Flags().IntVar(&port, "port", 443,
-	// 	"Secure port that the webhook listens on")
-	port = 443
-	logger.Info("klog.SetOutput(os.Stdout)")
-	// klog.SetOutput(os.Stdout)
-	// loggingFlags := &flag.FlagSet{
-	// }
-	// loggingFlags.Set("v","2")
-	// loggingFlags.Set("stderrThreshold", "Info")
-	// klog.InitFlags(loggingFlags)
-	// klog.V(2).Info("init")
-	// klog.Flush()
-	// os.Exit(1)
+
 }
 
 // admitv1beta1Func handles a v1beta1 admission
@@ -199,10 +185,24 @@ func test(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Hello"))
 }
 
-func main() {//cmd *cobra.Command, args []string
+func main() { //cmd *cobra.Command, args []string
+	loggingFlags := flag.NewFlagSet("webhook", flag.ExitOnError)
+
+	loggingFlags.StringVar(&certFile, "tls-cert-file", "",
+		"File containing the default x509 Certificate for HTTPS. (CA cert, if any, concatenated after server cert).")
+	loggingFlags.StringVar(&keyFile, "tls-private-key-file", "",
+		"File containing the default x509 private key matching --tls-cert-file.")
+	loggingFlags.IntVar(&port, "port", 443,
+		"Secure port that the webhook listens on")
+
+	klog.InitFlags(loggingFlags)
+	loggingFlags.Parse(os.Args[1:])
+
+	klog.V(2).Infof("init w/: port=%d", port)
+
 	config := Config{
-		CertFile: "/etc/webhook/certs/cert.pem",//certFile,
-		KeyFile:  "/etc/webhook/certs/key.pem",//keyFile,
+		CertFile: certFile, //"/etc/webhook/certs/cert.pem", //
+		KeyFile:  keyFile,  //"/etc/webhook/certs/key.pem",  //
 	}
 
 	http.HandleFunc("/crd", serveCRD)
