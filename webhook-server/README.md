@@ -15,9 +15,9 @@ go mod vendor
 docker build -t crixo/k8s-as-backend-webhook-server:v.0.0.0 .
 ```
 
-- laod image in kind
+- load image in kind
 ```
-kind load docker-image crixo/k8s-as-backend-webhook-server:v.0.0.0 --name standard
+kind load docker-image crixo/k8s-as-backend-webhook-server:v.0.0.0 --name k8s-as-backend --nodes="k8s-as-backend-worker,k8s-as-backend-worker2"
 ```
 
 - create and sign certificates
@@ -31,6 +31,12 @@ cd ..
 - apply k8s resources
 ```
 k apply -f artifacts/deployment.yaml,artifacts/service.yaml,artifacts/webhook-registration.yaml  
+```
+
+## Testing
+run all test from root
+```
+go test ./... -v
 ```
 
 

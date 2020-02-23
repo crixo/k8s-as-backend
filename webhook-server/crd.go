@@ -17,10 +17,9 @@ limitations under the License.
 package main
 
 import (
-	"bytes"
 	"encoding/json"
-	"net/http"
 
+	"github.com/crixo/k8s-as-backend/webhook-server/restclient"
 	"go.uber.org/zap"
 	v1 "k8s.io/api/admission/v1"
 	"k8s.io/klog"
@@ -29,7 +28,6 @@ import (
 // var (
 // 	logger = zap.NewExample()
 // )
-
 
 // This function expects all CRDs submitted to it to be apiextensions.k8s.io/v1beta1 or apiextensions.k8s.io/v1.
 func admitCRD(ar v1.AdmissionReview) *v1.AdmissionResponse {
@@ -40,7 +38,7 @@ func admitCRD(ar v1.AdmissionReview) *v1.AdmissionResponse {
 	// v1GVR := metav1.GroupVersionResource{Group: apiextensionsv1.GroupName, Version: "v1", Resource: resource}
 
 	reviewResponse := v1.AdmissionResponse{}
-	reviewResponse.Allowed = true
+	reviewResponse.Allowed = false
 
 	raw := ar.Request.Object.Raw
 	klog.V(2).Info(raw)
@@ -53,12 +51,15 @@ func admitCRD(ar v1.AdmissionReview) *v1.AdmissionResponse {
 		"raw": rawJson,
 	}
 
-	bytesRepresentation, err := json.Marshal(message)
-	if err != nil {
-		logger.Error(err.Error())
-	}
+	// bytesRepresentation, err := json.Marshal(message)
+	// if err != nil {
+	// 	logger.Error(err.Error())
+	// }
 
-	resp, err := http.Post(host+"/api/todo/validate", "application/json", bytes.NewBuffer(bytesRepresentation))
+	headers := make(map[string][]string)
+	headers["content-type"] = append(headers["content-type"], "application/json")
+	// resp, err := http.Post(host+"/api/todo/validate", "application/json", bytes.NewBuffer(bytesRepresentation))
+	resp, err := restclient.Post(host+"/api/todo/validate", message, headers)
 	if err != nil {
 		logger.Error(err.Error())
 	}
@@ -67,41 +68,12 @@ func admitCRD(ar v1.AdmissionReview) *v1.AdmissionResponse {
 
 	json.NewDecoder(resp.Body).Decode(&result)
 
-	//log.Println(result)
-
 	logger.With(zap.Any("raw", result)).Info("raw response")
 
-	// var labels map[string]string
+	if v, ok := result["valid"].(bool); ok {
+		reviewResponse.Allowed = v
+	}
 
-	// switch ar.Request.Resource {
-	// case v1beta1GVR:
-	// 	crd := apiextensionsv1beta1.CustomResourceDefinition{}
-	// 	deserializer := codecs.UniversalDeserializer()
-	// 	if _, _, err := deserializer.Decode(raw, nil, &crd); err != nil {
-	// 		klog.Error(err)
-	// 		return toV1AdmissionResponse(err)
-	// 	}
-	// 	labels = crd.Labels
-	// case v1GVR:
-	// 	crd := apiextensionsv1.CustomResourceDefinition{}
-	// 	deserializer := codecs.UniversalDeserializer()
-	// 	if _, _, err := deserializer.Decode(raw, nil, &crd); err != nil {
-	// 		klog.Error(err)
-	// 		return toV1AdmissionResponse(err)
-	// 	}
-	// 	labels = crd.Labels
-	// default:
-	// 	err := fmt.Errorf("expect resource to be one of [%v, %v] but got %v", v1beta1GVR, v1GVR, ar.Request.Resource)
-	// 	klog.Error(err)
-	// 	return toV1AdmissionResponse(err)
-	// }
-
-	// if v, ok := labels["webhook-e2e-test"]; ok {
-	// 	if v == "webhook-disallow" {
-	// 		reviewResponse.Allowed = false
-	// 		reviewResponse.Result = &metav1.Status{Message: "the crd contains unwanted label"}
-	// 	}
-	// }
 	return &reviewResponse
 
 }
