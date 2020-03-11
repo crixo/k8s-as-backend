@@ -67,6 +67,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		crdFactory,
 		&AccountFactory{},
 		&CertFactory{},
+		&SecretFactory{},
 	}
 
 	// TODO(user): Modify this to be the types you create that are owned by the primary resource

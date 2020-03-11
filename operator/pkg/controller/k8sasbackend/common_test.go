@@ -1,6 +1,8 @@
 package k8sasbackend
 
 import (
+	"crypto/x509"
+	"encoding/pem"
 	"testing"
 
 	k8sasbackendv1alpha1 "github.com/crixo/k8s-as-backend/operator/pkg/apis/k8sasbackend/v1alpha1"
@@ -23,7 +25,34 @@ import (
 	clientgotesting "k8s.io/client-go/testing"
 
 	apicert "k8s.io/api/certificates/v1beta1"
+
+	b64 "encoding/base64"
 )
+
+const certBase64String = "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURxVENDQXBHZ0F3SUJBZ0lVWUxLWFVlRDcrRjRURnE4dkJ4VXpvano1UUhVd0RRWUpLb1pJaHZjTkFRRUwKQlFBd0ZURVRNQkVHQTFVRUF4TUthM1ZpWlhKdVpYUmxjekFlRncweU1EQXpNVEV4T1RRNE1EQmFGdzB5TVRBegpNVEV4T1RRNE1EQmFNRFF4TWpBd0JnTlZCQU1US1dGa2JXbHpjMmx2YmkxM1pXSm9iMjlyTFdWNFlXMXdiR1V0CmMzWmpMbVJsWm1GMWJIUXVjM1pqTUlJQklqQU5CZ2txaGtpRzl3MEJBUUVGQUFPQ0FROEFNSUlCQ2dLQ0FRRUEKNlFNR1c0aFZFd3dGN2NCdEVqaE02aGUzSThQNDc5ZVQraXhCQWpXcjR5L2dkWURXeFprNG5kWnY4SHVKY0JWTQpDNUEwSG5jZXNlaFMrTmJ5a2dxN1lDd01LM3FDUlJPMVpKa1Y3d1JvSDhIOU91ZmxsczdWY0hQTDMyeU5jVnQxCnVGWFlDUUpKVUYxUjRXczJVNnFvUlVFN040T1plQXRWcnM2YmpVZzZuSFR0ZWtUUUt5ekxHMWV6UG5rNWRtNFEKdTlXVFVBa0lSTm8vemQrTkJkaDYwdy96UHVTZkRDcFV0U1dkYWFQUnVjb3hTV0ZVWDROWEYzNUhoVW91OTk3QgpoZWl6TEhiVndiK2Fqc3I1UEVJL2ZOd1RwaWtoNnZiVGkvRDZOMGRVdW94enBDSlVtSnkwSjFKc0pDSnVZeHAxCjNjeHpUbjdMUEdBcHVnR3JnWEZ1NlFJREFRQUJvNEhSTUlIT01BNEdBMVVkRHdFQi93UUVBd0lGb0RBVEJnTlYKSFNVRUREQUtCZ2dyQmdFRkJRY0RBVEFNQmdOVkhSTUJBZjhFQWpBQU1CMEdBMVVkRGdRV0JCU3VKUWJVcWhacwpYdS9KK3dGb3RpM0toOEpUSkRCNkJnTlZIUkVFY3pCeGdoMWhaRzFwYzNOcGIyNHRkMlZpYUc5dmF5MWxlR0Z0CmNHeGxMWE4yWTRJbFlXUnRhWE56YVc5dUxYZGxZbWh2YjJzdFpYaGhiWEJzWlMxemRtTXVaR1ZtWVhWc2RJSXAKWVdSdGFYTnphVzl1TFhkbFltaHZiMnN0WlhoaGJYQnNaUzF6ZG1NdVpHVm1ZWFZzZEM1emRtTXdEUVlKS29aSQpodmNOQVFFTEJRQURnZ0VCQUJBU0ZQT05JQTBkV3Z3ekF2NmJJN2Y1clhmVWtWZVkwZUIxZmx0UTlndUM0Z3JHCldsZ0gvOGxHQThCVjVNUUxTaWsxV1FiVmtackYySDVSNEFlaUVqYkxHQlRJc2doYXROSFZLZitjdEprbGhjRysKVXc5bk5HSnVhWWdvNkx5NmRBS0R5YXNuWmlHNDNKL3NOM0tHQzJPRktLUGFHK0pYWHFYbWxwU3RNbWV1OVpsagp0R2RaVDFiUktNeWlCa3cwMDd2R2pENjMzSzFBU2pLbHRDeEFwY2FZUVlkeTY5RC9kUHgweU5XcmdkUGlZd2hRClBwWThqOFVpMExaNGd1NlRtYXRPb0xGSW84OGxwUGt3RVpOZUthbENuRGNLWW9OKzByT0o2QTRzZExJVmNZNm8KSkJBc1NPSFpSa29qNkNFcG45MGF1SVdqSmtkdnM5WVNhLzNUUC9BPQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg=="
+
+func TestConverCertificateStringTofile(t *testing.T) {
+	logf.SetLogger(logf.ZapLogger(true))
+
+	certPEM, err := b64.StdEncoding.DecodeString(certBase64String)
+	if err != nil {
+		log.Error(err, "Unable to decode cert base64 string")
+	}
+
+	log.Info("cert file content", "certPEM", string(certPEM))
+
+	block, _ := pem.Decode([]byte(certPEM))
+	if block == nil {
+		panic("failed to parse certificate PEM")
+	}
+	cert, err := x509.ParseCertificate(block.Bytes)
+	if err != nil {
+		panic("failed to parse certificate: " + err.Error())
+	}
+
+	//t.Log(cert.Subject)
+	log.Info("cert", "Subject", cert.Subject)
+}
 
 func TestReadCertificate(t *testing.T) {
 	certFactory := &CertFactory{}
@@ -111,10 +140,11 @@ func (r CertApprovalReactor) Handles(action clientgotesting.Action) bool {
 // React handles the action and returns results.  It may choose to
 // delegate by indicated handled=false.
 func (r CertApprovalReactor) React(action clientgotesting.Action) (handled bool, ret runtime.Object, err error) {
+	cert, _ := b64.StdEncoding.DecodeString(certBase64String)
 	updAction := action.(clientgotesting.UpdateAction)
 	obj := updAction.GetObject()
 	originalResource := obj.(*apicert.CertificateSigningRequest)
-	originalResource.Status.Certificate = make([]byte, 128)
+	originalResource.Status.Certificate = cert //make([]byte, 128)
 	return true, originalResource.DeepCopy(), nil
 }
 
