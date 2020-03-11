@@ -45,7 +45,11 @@ func (r *ReconcileK8sAsBackend) ensureResource(request reconcile.Request,
 
 		resource := resourceFactory.create(name, instance)
 		metaObject, _ := meta.Accessor(resource)
-		controllerutil.SetControllerReference(instance, metaObject, r.scheme)
+
+		if metaObject.GetNamespace() != "" {
+			// not tracking cluster-wide resources (eg. crd, csr)
+			controllerutil.SetControllerReference(instance, metaObject, r.scheme)
+		}
 
 		// Create the resource
 		log.Info(fmt.Sprintf("Creating a new %s", kind),

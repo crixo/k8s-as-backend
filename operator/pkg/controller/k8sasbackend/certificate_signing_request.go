@@ -70,6 +70,15 @@ func (f CertFactory) ensure(r *ReconcileK8sAsBackend,
 			log.Info("Requeuing waiting for approvale", "Certificate", found.Status.Certificate)
 			return &reconcile.Result{Requeue: true}, err
 		}
+
+		found = resp
+	}
+
+	cert := found.Status.Certificate
+	err = ioutil.WriteFile("/Users/cristiano/Coding/golang/k8s-as-backend/operator/server-cert.pem", cert, 0644)
+	if err != nil {
+		log.Error(err, "Unable to write cert to file")
+		return &reconcile.Result{}, err
 	}
 
 	return nil, nil
