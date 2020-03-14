@@ -1,7 +1,6 @@
 package webhookserver
 
 import (
-	"context"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
@@ -18,10 +17,18 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
-func (ws WebhookServer) ensureSecret(i *k8sasbackendv1alpha1.K8sAsBackend) error {
-	ws.createCertIfNeeded()
+func (ws WebhookServer) ensureSecret(i *k8sasbackendv1alpha1.K8sAsBackend) (*reconcile.Result, error) {
+	//_, err := ws.createCertIfNeeded()
+	requeue, err := ws.createCertIfNeeded()
+	if err != nil {
+		return &reconcile.Result{}, err
+	} else if requeue {
+		common.Log.Info("createCertIfNeeded request a requeue")
+		return &reconcile.Result{Requeue: true}, err
+	}
 
 	resUtils := &common.ResourceUtils{
 		Scheme:          ws.Scheme,
@@ -30,15 +37,19 @@ func (ws WebhookServer) ensureSecret(i *k8sasbackendv1alpha1.K8sAsBackend) error
 	}
 
 	found := &corev1.Secret{}
-	return common.EnsureResource(found, secretName, i, resUtils)
+	err = common.EnsureResource(found, secretName, i, resUtils)
+	common.Log.Info("ensureSecret returns a null result")
+	return nil, err
 }
 
 func (ws WebhookServer) createCertIfNeeded() (requeue bool, err error) {
 	if common.FileNotExists(ws.CerFilePath) {
 
-		found := &v1beta1.CertificateSigningRequest{}
-		nsName := types.NamespacedName{Name: csrName, Namespace: ""}
-		err := ws.Client.Get(context.TODO(), nsName, found)
+		//found := &v1beta1.CertificateSigningRequest{}
+		//nsName := types.NamespacedName{Name: csrName, Namespace: ""}
+		//err := ws.Client.Get(context.TODO(), nsName, found)
+
+		found, err := ws.CertClient.Get(csrName, metav1.GetOptions{})
 		if err != nil && errors.IsNotFound(err) {
 			certRequest := ws.createKeyAndCertRequestAsPem()
 			err := ws.createSigningRequest(certRequest)
@@ -50,6 +61,7 @@ func (ws WebhookServer) createCertIfNeeded() (requeue bool, err error) {
 				panic(err)
 			}
 
+			log.Info("Requeue - waiting for certificate provisioning")
 			return true, err
 		} else if err != nil {
 			// Error that isn't due to the resource not existing
@@ -65,6 +77,7 @@ func (ws WebhookServer) createCertIfNeeded() (requeue bool, err error) {
 		if err != nil {
 			return false, err
 		}
+		ws.CertClient.Delete(found.Name, &metav1.DeleteOptions{})
 	}
 
 	return false, nil
@@ -83,9 +96,13 @@ func (ws WebhookServer) createSecret(resourceName string, i *k8sasbackendv1alpha
 
 func (ws WebhookServer) approveCertificate() error {
 
-	found := &v1beta1.CertificateSigningRequest{}
-	nsName := types.NamespacedName{Name: csrName, Namespace: ""}
-	err := ws.Client.Get(context.TODO(), nsName, found)
+	// found := &v1beta1.CertificateSigningRequest{}
+	// nsName := types.NamespacedName{Name: csrName, Namespace: ""}
+	// err := ws.Client.Get(context.TODO(), nsName, found)
+	found, err := ws.CertClient.Get(csrName, metav1.GetOptions{})
+	if err != nil {
+		panic(err)
+	}
 	found.Status.Conditions = []v1beta1.CertificateSigningRequestCondition{{
 		LastUpdateTime: metav1.Now(),
 		Message:        "This CSR was approved by k8s-as-backend operator.",
@@ -97,7 +114,7 @@ func (ws WebhookServer) approveCertificate() error {
 		panic(err)
 	}
 
-	log.Info("UpdateApproval", "resp", resp, "Status", resp.Status, "ContentLength", len(resp.Status.Certificate))
+	log.Info("UpdateApproval", "ContentLength", len(resp.Status.Certificate))
 	return err
 }
 
@@ -149,12 +166,6 @@ func (ws WebhookServer) createKeyAndCertRequestAsPem() (csrPem []byte) {
 
 func (ws WebhookServer) createSigningRequest(request []byte) error {
 	// name := "admission-webhook-example-svc.default"
-	found := &v1beta1.CertificateSigningRequest{}
-	nsName := types.NamespacedName{Name: csrName, Namespace: ""}
-	err := ws.Client.Get(context.TODO(), nsName, found)
-	if err == nil {
-		ws.Client.Delete(context.TODO(), found)
-	}
 
 	res := &v1beta1.CertificateSigningRequest{
 		ObjectMeta: common.CreateMeta(csrName, ""),
@@ -165,5 +176,7 @@ func (ws WebhookServer) createSigningRequest(request []byte) error {
 		},
 	}
 
-	return ws.Client.Create(context.TODO(), res)
+	//return ws.Client.Create(context.TODO(), res)
+	_, err := ws.CertClient.Create(res)
+	return err
 }
