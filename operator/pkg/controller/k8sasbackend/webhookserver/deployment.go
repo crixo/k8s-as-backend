@@ -7,9 +7,10 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
-func (ws WebhookServer) ensureDeployment(i *k8sasbackendv1alpha1.K8sAsBackend) error {
+func (ws WebhookServer) ensureDeployment(i *k8sasbackendv1alpha1.K8sAsBackend) (*reconcile.Result, error) {
 	resUtils := &common.ResourceUtils{
 		Scheme:          ws.Scheme,
 		Client:          ws.Client,
@@ -17,7 +18,7 @@ func (ws WebhookServer) ensureDeployment(i *k8sasbackendv1alpha1.K8sAsBackend) e
 	}
 
 	found := &appsv1.Deployment{}
-	return common.EnsureResource(found, "k8s-as-backend-webhook-server", i, resUtils)
+	return nil, common.EnsureResource(found, "k8s-as-backend-webhook-server", i, resUtils)
 }
 
 func createDeployment(resourceName string, i *k8sasbackendv1alpha1.K8sAsBackend) runtime.Object {

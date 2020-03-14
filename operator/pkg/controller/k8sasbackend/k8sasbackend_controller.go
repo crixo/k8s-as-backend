@@ -5,8 +5,10 @@ import (
 	"fmt"
 
 	k8sasbackendv1alpha1 "github.com/crixo/k8s-as-backend/operator/pkg/apis/k8sasbackend/v1alpha1"
+	common "github.com/crixo/k8s-as-backend/operator/pkg/controller/k8sasbackend/common"
 	webhookserver "github.com/crixo/k8s-as-backend/operator/pkg/controller/k8sasbackend/webhookserver"
 
+	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -15,15 +17,15 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
-	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 )
 
-var log = logf.Log.WithName("controller_k8sasbackend")
-
-var webhookServer *webhookserver.WebhookServer
+var (
+	webhookServer *webhookserver.WebhookServer
+	log           logr.Logger = common.Log
+)
 
 /**
 * USER ACTION REQUIRED: This is a scaffold file intended for the user to modify with their own Controller

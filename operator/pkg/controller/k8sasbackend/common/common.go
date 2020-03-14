@@ -15,7 +15,12 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
 )
+
+var Log = logf.Log.WithName("controller_k8sasbackend")
 
 func GetKind(obj runtime.Object) string {
 	return fmt.Sprintf("%T", obj)
@@ -87,6 +92,16 @@ func EnsureResource(found runtime.Object,
 	}
 
 	return nil
+}
+
+// Component must return nil if all good
+func PrepareComponentResult(res *reconcile.Result, err error) (mustReturn bool) {
+	if err != nil {
+		return true
+	} else if res != nil {
+		return true
+	}
+	return false
 }
 
 //type resourceFactory func(name string, instance *k8sasbackendv1alpha1.K8sAsBackend) runtime.Object
