@@ -41,6 +41,8 @@ func Add(mgr manager.Manager) error {
 // newReconciler returns a new reconcile.Reconciler
 func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 
+	common.AppState.ClientConfig = mgr.GetConfig()
+
 	reconciler := &ReconcileK8sAsBackend{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
@@ -72,6 +74,22 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	if err != nil {
 		return err
 	}
+
+	// err = c.Watch(&source.Kind{Type: &arv1beta1.ValidatingWebhookConfiguration{}}, &handler.EnqueueRequestsFromMapFunc{
+	// 	ToRequests: handler.ToRequestsFunc(func(a handler.MapObject) []reconcile.Request {
+	// 		return []reconcile.Request{
+	// 			{
+	// 				NamespacedName: types.NamespacedName{Namespace: "", Name: webhookserver.ValidationWebhookName},
+	// 			},
+	// 			// {
+	// 			// 	NamespacedName: types.NamespacedName{Namespace: "biz", Name: "baz"},
+	// 			// },
+	// 		}
+	// 	}),
+	// })
+	// if err != nil {
+	// 	return err
+	// }
 
 	watchedObjects := []runtime.Object{}
 	watchedObjects = append(watchedObjects,
@@ -113,14 +131,29 @@ type ReconcileK8sAsBackend struct {
 // The Controller will requeue the Request to be processed again if the returned error is non-nil or
 // Result.Requeue is true, otherwise upon completion it will remove the work from the queue.
 func (r *ReconcileK8sAsBackend) Reconcile(request reconcile.Request) (reconcile.Result, error) {
-	reqLogger := log.WithValues("Request.Namespace", request.Namespace, "Request.Name", request.Name)
+	reqLogger := log.WithValues(
+		"Request.NamespacedName", request.NamespacedName,
+		"Request.Namespace", request.Namespace,
+		"Request.Name", request.Name)
 	reqLogger.Info("Reconciling K8sAsBackend")
+
+	// TODO: cluster-wide resources limitation
+	// cluster-wide resources are watched
+	// cluster-wide resources are garbage-collected due to resource factory hack forcing primary resource ns
+	// cluster-wide resources cannot be reconcile because the request created by its change
+	//   does not contain the ns needed to load the primary resource
+	// if you create a cluster-wide resources w/o the primary resource that resource cannot be owned by the primary resource
+	// request example for cluster-wide resource owned by primary resource thruogh res factory hack
+	// "msg":"Reconciling K8sAsBackend","Request.NamespacedName":"/example-k8sasbackend","Request.Namespace":"","Request.Name":"example-k8sasbackend"}
+	// HACK -> force Request.NamespacedName used to load primary resource getting the ns value from a global settings
+	//   or from a previous reconcile request strored within the state of *ReconcileK8sAsBackend
 
 	// Fetch the K8sAsBackend instance
 	instance := &k8sasbackendv1alpha1.K8sAsBackend{}
 	err := r.Client.Get(context.TODO(), request.NamespacedName, instance)
 	if err != nil {
 		if errors.IsNotFound(err) {
+			reqLogger.Info("main crd not found")
 			// Request object not found, could have been deleted after reconcile request.
 			// Owned objects are automatically garbage collected. For additional cleanup logic use finalizers.
 			// Return and don't requeue
@@ -134,79 +167,6 @@ func (r *ReconcileK8sAsBackend) Reconcile(request reconcile.Request) (reconcile.
 	if result != nil {
 		return *result, err
 	}
-
-	// nsName := types.NamespacedName{
-	// 	Name:      "admission-webhook-example-certs",
-	// 	Namespace: instance.Namespace,
-	// }
-	// // sec := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{
-	// // 	Name:      nsName.Name,
-	// // 	Namespace: nsName.Namespace,
-	// // }}
-	// // if err := controllerutil.SetControllerReference(instance, sec, r.Scheme); err != nil {
-	// // 	panic(err)
-	// // }
-	// cert, _ := ioutil.ReadFile(webhookServer.CerFilePath)
-	// key, _ := ioutil.ReadFile(webhookServer.KeyFilePath)
-	// sec := &corev1.Secret{
-	// 	ObjectMeta: common.CreateMeta(nsName.Name, nsName.Namespace),
-	// 	Type:       "Opaque",
-
-	// 	Data: map[string][]byte{
-	// 		"key.pem":  cert,
-	// 		"cert.pem": key,
-	// 	},
-	// }
-	// if err := controllerutil.SetControllerReference(instance, sec, r.Scheme); err != nil {
-	// 	panic(err)
-	// }
-
-	// secret := &corev1.Secret{
-	// 	ObjectMeta: metav1.ObjectMeta{
-	// 		Name:      "my-secret",
-	// 		Namespace: instance.Namespace,
-	// 	},
-	// 	Type: "Opaque",
-
-	// 	StringData: map[string]string{
-	// 		"key.pem":  "cert",
-	// 		"cert.pem": "key",
-	// 	},
-	// }
-	// // if err := controllerutil.SetControllerReference(instance, secret, r.Scheme); err != nil {
-	// // 	log.Error(err, "secret SetControllerReference")
-	// // 	return reconcile.Result{}, err
-	// // }
-	// controllerutil.SetControllerReference(instance, secret, r.Scheme)
-	// founds := &corev1.Secret{}
-	// err = r.Client.Get(context.TODO(), types.NamespacedName{Name: secret.Name, Namespace: secret.Namespace}, founds)
-	// if err != nil && errors.IsNotFound(err) {
-	// 	reqLogger.Info("Creating a new Secret", "Secret.Namespace", secret.Namespace, "Secret.Name", secret.Name)
-	// 	err = r.Client.Create(context.TODO(), secret)
-
-	// 	//
-	// 	if err != nil {
-	// 		return reconcile.Result{}, err
-	// 	}
-	// }
-
-	// // // Define a new Pod object
-	// pod := newPodForCR(instance)
-	// // Set K8sAsBackend instance as the owner and controller
-	// if err := controllerutil.SetControllerReference(instance, pod, r.Scheme); err != nil {
-	// 	return reconcile.Result{}, err
-	// }
-	// // Check if this Pod already exists
-	// found := &corev1.Pod{}
-	// err = r.Client.Get(context.TODO(), types.NamespacedName{Name: pod.Name, Namespace: pod.Namespace}, found)
-	// if err != nil && errors.IsNotFound(err) {
-	// 	reqLogger.Info("Creating a new Pod", "Pod.Namespace", pod.Namespace, "Pod.Name", pod.Name)
-	// 	err = r.Client.Create(context.TODO(), pod)
-	// 	//controllerutil.SetControllerReference(instance, pod, r.Scheme)
-	// 	if err != nil {
-	// 		return reconcile.Result{}, err
-	// 	}
-	// }
 
 	// == Finish ==========
 	// Everything went fine, don't requeue

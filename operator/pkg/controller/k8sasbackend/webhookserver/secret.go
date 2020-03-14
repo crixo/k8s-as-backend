@@ -36,8 +36,9 @@ func (ws WebhookServer) ensureSecret(i *k8sasbackendv1alpha1.K8sAsBackend) (*rec
 		ResourceFactory: ws.createSecret,
 	}
 
+	nsn := types.NamespacedName{Name: secretName, Namespace: i.Namespace}
 	found := &corev1.Secret{}
-	err = common.EnsureResource(found, secretName, i, resUtils)
+	err = common.EnsureResource(found, nsn, i, resUtils)
 	common.Log.Info("ensureSecret returns a null result")
 	return nil, err
 }
@@ -84,8 +85,7 @@ func (ws WebhookServer) createCertIfNeeded() (requeue bool, err error) {
 
 }
 
-func (ws WebhookServer) createSecret(resourceName string, i *k8sasbackendv1alpha1.K8sAsBackend) runtime.Object {
-	nsName := types.NamespacedName{Name: resourceName, Namespace: i.Namespace}
+func (ws WebhookServer) createSecret(nsName types.NamespacedName, i *k8sasbackendv1alpha1.K8sAsBackend) runtime.Object {
 	cert, _ := ioutil.ReadFile(ws.CerFilePath)
 	key, _ := ioutil.ReadFile(ws.KeyFilePath)
 	return common.CreateSecret(nsName, map[string][]byte{

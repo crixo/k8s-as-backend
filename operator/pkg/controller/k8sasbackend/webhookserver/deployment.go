@@ -7,6 +7,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
@@ -17,36 +18,34 @@ func (ws WebhookServer) ensureDeployment(i *k8sasbackendv1alpha1.K8sAsBackend) (
 		ResourceFactory: createDeployment,
 	}
 
+	nsn := types.NamespacedName{Name: deploymentName, Namespace: i.Namespace}
 	found := &appsv1.Deployment{}
-	return nil, common.EnsureResource(found, "k8s-as-backend-webhook-server", i, resUtils)
+	return nil, common.EnsureResource(found, nsn, i, resUtils)
 }
 
-func createDeployment(resourceName string, i *k8sasbackendv1alpha1.K8sAsBackend) runtime.Object {
-	labels := map[string]string{
-		"app": "k8s-as-backend-webhook-server",
-	}
+func createDeployment(resNamespacedName types.NamespacedName, i *k8sasbackendv1alpha1.K8sAsBackend) runtime.Object {
 	image := "crixo/k8s-as-backend-webhook-server:v.0.0.0"
 	var replicas int32 = 1
 
 	return &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      resourceName,
-			Namespace: i.Namespace,
+			Name:      resNamespacedName.Name,
+			Namespace: resNamespacedName.Namespace,
 		},
 		Spec: appsv1.DeploymentSpec{
 			Replicas: &replicas,
 			Selector: &metav1.LabelSelector{
-				MatchLabels: labels,
+				MatchLabels: matchingLabels,
 			},
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
-					Labels: labels,
+					Labels: matchingLabels,
 				},
 				Spec: corev1.PodSpec{
 					Containers: []corev1.Container{{
 						Image: image,
 						//ImagePullPolicy: corev1.PullAlways,
-						Name: "k8s-as-backend-webhook-server",
+						Name: deploymentName,
 						Ports: []corev1.ContainerPort{{
 							ContainerPort: 443,
 							//Name:          "visitors",
