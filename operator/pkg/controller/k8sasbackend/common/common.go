@@ -18,9 +18,12 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
+
+	"k8s.io/client-go/rest"
 )
 
 var Log = logf.Log.WithName("controller_k8sasbackend")
+var AppState = &State{}
 
 func GetKind(obj runtime.Object) string {
 	return fmt.Sprintf("%T", obj)
@@ -55,39 +58,54 @@ func CreateSecret(nsName types.NamespacedName, data map[string][]byte) *corev1.S
 	}
 }
 
+type State struct {
+	ClientConfig *rest.Config
+}
+
 type ResourceUtils struct {
 	Scheme          *runtime.Scheme
 	Client          client.Client
-	ResourceFactory func(resourceName string, i *k8sasbackendv1alpha1.K8sAsBackend) runtime.Object
+	ResourceFactory func(namespacedName types.NamespacedName, i *k8sasbackendv1alpha1.K8sAsBackend) runtime.Object
 }
 
 func EnsureResource(found runtime.Object,
-	resourceName string,
+	resourceNamespacedName types.NamespacedName,
 	i *k8sasbackendv1alpha1.K8sAsBackend,
 	resUtils *ResourceUtils,
 ) error {
-	nsName := types.NamespacedName{Name: resourceName, Namespace: i.Namespace}
-	err := resUtils.Client.Get(context.TODO(), nsName, found)
-	//log.Error(err, "getting secret")
+	if resourceNamespacedName.Namespace != "" && i.Namespace != resourceNamespacedName.Namespace {
+		panic(fmt.Sprintf(
+			"resource ns %s must match with primary resource ns %s",
+			resourceNamespacedName.Namespace, i.Namespace))
+	}
+	nsn := resourceNamespacedName
+	err := resUtils.Client.Get(context.TODO(), nsn, found)
+	Log.Info(fmt.Sprintf("Getting %T", found))
 	if err != nil && errors.IsNotFound(err) {
-		resource := resUtils.ResourceFactory(nsName.Name, i)
+		resource := resUtils.ResourceFactory(nsn, i)
 		// object must be the same instance used for the Client.Create
 		// this call must occur earlier then Client.Create
-		if err := controllerutil.SetControllerReference(i, resource.(metav1.Object), resUtils.Scheme); err != nil {
+		metaObj := resource.(metav1.Object)
+		// handle cluster-wide resource such as ValidatingWebhookConfiguration and CRD
+		//if metaObj.GetNamespace() != "" {
+		if err := controllerutil.SetControllerReference(i, metaObj, resUtils.Scheme); err != nil {
 			panic(err)
 		}
+		//}
 		err = resUtils.Client.Create(context.TODO(), resource)
 		if err != nil {
 			// Resource Creation failed
-			//log.Error(err, "Failed to create new Deployment", "Deployment.Namespace", dep.Namespace, "Deployment.Name", dep.Name)
+			Log.Error(err, fmt.Sprintf("Failed to create new %T", found), "Namespace", nsn.Namespace, "Name", nsn.Name)
 			return err
 		} else {
 			// Resource Creation was successful
+			Log.Info(fmt.Sprintf("Creation succeded for new %T", found))
 			return nil
 		}
 	} else if err != nil {
 		// Error that isn't due to the resource not existing
 		//log.Error(err, fmt.Sprintf("Failed to get %s", common.GetKind(found)))
+		Log.Error(err, fmt.Sprintf("Failed to get %T", found))
 		return err
 	}
 
