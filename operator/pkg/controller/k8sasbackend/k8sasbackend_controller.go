@@ -5,7 +5,10 @@ import (
 	"fmt"
 
 	k8sasbackendv1alpha1 "github.com/crixo/k8s-as-backend/operator/pkg/apis/k8sasbackend/v1alpha1"
+	authz "github.com/crixo/k8s-as-backend/operator/pkg/controller/k8sasbackend/authz"
+	clusterdep "github.com/crixo/k8s-as-backend/operator/pkg/controller/k8sasbackend/clusterdep"
 	common "github.com/crixo/k8s-as-backend/operator/pkg/controller/k8sasbackend/common"
+	todoapp "github.com/crixo/k8s-as-backend/operator/pkg/controller/k8sasbackend/todoapp"
 	webhookserver "github.com/crixo/k8s-as-backend/operator/pkg/controller/k8sasbackend/webhookserver"
 
 	"github.com/go-logr/logr"
@@ -23,8 +26,11 @@ import (
 )
 
 var (
-	webhookServer *webhookserver.WebhookServer
-	log           logr.Logger = common.Log
+	clusterDependencies *clusterdep.ClusterDependencies
+	authorization       *authz.Authz
+	webhookServer       *webhookserver.WebhookServer
+	todoApp             *todoapp.TodoApp
+	log                 logr.Logger = common.Log
 )
 
 /**
@@ -49,14 +55,19 @@ func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 		//certClient: certClient.CertificateSigningRequests(),
 	}
 
+	clusterDependencies = clusterdep.NewClusterDependencies(reconciler.Client, reconciler.Scheme)
+
+	authorization = authz.NewAuthz(mgr)
+
 	certCl, _ := certv1beta1.NewForConfig(mgr.GetConfig())
-	webhookServer = &webhookserver.WebhookServer{
-		CerFilePath: "/Users/cristiano/Coding/golang/k8s-as-backend/operator/certs/server-cert.pem",
-		KeyFilePath: "/Users/cristiano/Coding/golang/k8s-as-backend/operator/certs/server-key.pem",
-		Client:      reconciler.Client,
-		Scheme:      reconciler.Scheme,
-		CertClient:  certCl.CertificateSigningRequests(),
-	}
+	webhookServer = webhookserver.NewWebhookServer(reconciler.Client,
+		reconciler.Scheme,
+		"/Users/cristiano/Coding/golang/k8s-as-backend/operator/certs/server-cert.pem",
+		"/Users/cristiano/Coding/golang/k8s-as-backend/operator/certs/server-key.pem",
+		certCl.CertificateSigningRequests(),
+	)
+
+	todoApp = todoapp.NewTodoApp(mgr)
 
 	return reconciler
 }
@@ -75,6 +86,9 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
+	// TODO:
+	// for cluster-wide resource w/ dependecies on primary respurce eg. ValidatingWebhookConfiguration
+	// use EnqueueRequestsFromMapFunc but you have to track all main resources created by the oprator to set as "ToRequests"
 	// err = c.Watch(&source.Kind{Type: &arv1beta1.ValidatingWebhookConfiguration{}}, &handler.EnqueueRequestsFromMapFunc{
 	// 	ToRequests: handler.ToRequestsFunc(func(a handler.MapObject) []reconcile.Request {
 	// 		return []reconcile.Request{
@@ -92,13 +106,14 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	// }
 
 	watchedObjects := []runtime.Object{}
-	watchedObjects = append(watchedObjects,
-		webhookServer.GetWatchedResources()...)
+	watchedObjects = append(watchedObjects, authorization.GetWatchedResources()...)
+	watchedObjects = append(watchedObjects, webhookServer.GetWatchedResources()...)
+	watchedObjects = append(watchedObjects, todoApp.GetWatchedResources()...)
 	log.Info("Watching", "watchedObjects", len(watchedObjects))
 	watchedObjects = removeDuplicates(watchedObjects)
 	log.Info("Watching after remove duplicates", "watchedObjects", len(watchedObjects))
 	for _, obj := range watchedObjects {
-		log.Info("Watching", "resource", fmt.Sprintf("%T", obj))
+		log.Info("Watching secondary resources", "resource", fmt.Sprintf("%T", obj))
 		err = c.Watch(&source.Kind{Type: obj}, &handler.EnqueueRequestForOwner{
 			IsController: true,
 			OwnerType:    &k8sasbackendv1alpha1.K8sAsBackend{},
@@ -147,10 +162,16 @@ func (r *ReconcileK8sAsBackend) Reconcile(request reconcile.Request) (reconcile.
 	// "msg":"Reconciling K8sAsBackend","Request.NamespacedName":"/example-k8sasbackend","Request.Namespace":"","Request.Name":"example-k8sasbackend"}
 	// HACK -> force Request.NamespacedName used to load primary resource getting the ns value from a global settings
 	//   or from a previous reconcile request strored within the state of *ReconcileK8sAsBackend
+	result, err := clusterDependencies.Reconcile()
+	if result != nil {
+		return *result, err
+	} else if err != nil {
+		return reconcile.Result{}, err
+	}
 
 	// Fetch the K8sAsBackend instance
 	instance := &k8sasbackendv1alpha1.K8sAsBackend{}
-	err := r.Client.Get(context.TODO(), request.NamespacedName, instance)
+	err = r.Client.Get(context.TODO(), request.NamespacedName, instance)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			reqLogger.Info("main crd not found")
@@ -163,9 +184,25 @@ func (r *ReconcileK8sAsBackend) Reconcile(request reconcile.Request) (reconcile.
 		return reconcile.Result{}, err
 	}
 
-	result, err := webhookServer.Reconcile(instance)
+	result, err = authorization.Reconcile(instance)
 	if result != nil {
 		return *result, err
+	} else if err != nil {
+		return reconcile.Result{}, err
+	}
+
+	result, err = webhookServer.Reconcile(instance)
+	if result != nil {
+		return *result, err
+	} else if err != nil {
+		return reconcile.Result{}, err
+	}
+
+	result, err = todoApp.Reconcile(instance)
+	if result != nil {
+		return *result, err
+	} else if err != nil {
+		return reconcile.Result{}, err
 	}
 
 	// == Finish ==========

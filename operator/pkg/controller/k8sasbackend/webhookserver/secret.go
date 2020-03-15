@@ -29,6 +29,7 @@ func (ws WebhookServer) ensureSecret(i *k8sasbackendv1alpha1.K8sAsBackend) (*rec
 		common.Log.Info("createCertIfNeeded request a requeue")
 		return &reconcile.Result{Requeue: true}, err
 	}
+	//TODO: if certs have been recreated and secret already exists, delete it
 
 	resUtils := &common.ResourceUtils{
 		Scheme:          ws.Scheme,
@@ -151,9 +152,9 @@ func (ws WebhookServer) createKeyAndCertRequestAsPem() (csrPem []byte) {
 		//EmailAddresses:     []string{emailAddress},
 		SignatureAlgorithm: x509.SHA256WithRSA,
 		DNSNames: []string{
-			"service=admission-webhook-example-svc",
-			"service=admission-webhook-example-svc.default",
-			"service=admission-webhook-example-svc.default.svc"},
+			"admission-webhook-example-svc",
+			"admission-webhook-example-svc.default",
+			"admission-webhook-example-svc.default.svc"},
 	}
 
 	csr, _ := x509.CreateCertificateRequest(rand.Reader, &template, keyBytes)

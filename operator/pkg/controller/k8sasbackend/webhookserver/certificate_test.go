@@ -1,4 +1,4 @@
-package k8sasbackend
+package webhookserver
 
 import (
 	"crypto/rand"
