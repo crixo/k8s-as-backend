@@ -74,7 +74,16 @@ func main() {
 	}
 
 	defaultResync := getEnvAsInt("INFORMER_RESYNC", 0)
-	factory := todoInformers.NewSharedInformerFactory(todoClient, (time.Second*time.Duration(defaultResync))) // 0 disable resync // time.Second*30
+	namespace := getEnv("NAMESPACE", "")
+	var factory todoInformers.SharedInformerFactory
+	if namespace == "" {
+		factory = todoInformers.NewSharedInformerFactory(todoClient, (time.Second * time.Duration(defaultResync))) // 0 disable resync // time.Second*30
+	} else {
+		factory = todoInformers.NewSharedInformerFactoryWithOptions(
+			todoClient,
+			(time.Second * time.Duration(defaultResync)), // 0 disable resync // time.Second*30
+			todoInformers.WithNamespace(namespace))
+	}
 	todoInformer := factory.K8sasbackend().V1().Todos().Informer()
 	todoInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: func(obj interface{}) {
@@ -204,7 +213,7 @@ func eventRecorder(kubeClient *kubernetes.Clientset) record.EventRecorder {
 
 func getEnv(key string, defaultVal string) string {
 	if value, exists := os.LookupEnv(key); exists {
-return value
+		return value
 	}
 
 	return defaultVal

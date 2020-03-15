@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"unicode/utf8"
 
 	k8sasbackendv1alpha1 "github.com/crixo/k8s-as-backend/operator/pkg/apis/k8sasbackend/v1alpha1"
 
@@ -73,11 +74,11 @@ func EnsureResource(found runtime.Object,
 	i *k8sasbackendv1alpha1.K8sAsBackend,
 	resUtils *ResourceUtils,
 ) error {
-	if resourceNamespacedName.Namespace != "" && i.Namespace != resourceNamespacedName.Namespace {
-		panic(fmt.Sprintf(
-			"resource ns %s must match with primary resource ns %s",
-			resourceNamespacedName.Namespace, i.Namespace))
-	}
+	// if resourceNamespacedName.Namespace != "" && i.Namespace != resourceNamespacedName.Namespace {
+	// 	panic(fmt.Sprintf(
+	// 		"resource ns %s must match with primary resource ns %s",
+	// 		resourceNamespacedName.Namespace, i.Namespace))
+	// }
 	nsn := resourceNamespacedName
 	err := resUtils.Client.Get(context.TODO(), nsn, found)
 	Log.Info(fmt.Sprintf("Getting %T", found))
@@ -87,9 +88,10 @@ func EnsureResource(found runtime.Object,
 		// this call must occur earlier then Client.Create
 		metaObj := resource.(metav1.Object)
 		// handle cluster-wide resource such as ValidatingWebhookConfiguration and CRD
-		//if metaObj.GetNamespace() != "" {
-		if err := controllerutil.SetControllerReference(i, metaObj, resUtils.Scheme); err != nil {
-			panic(err)
+		if i != nil {
+			if err := controllerutil.SetControllerReference(i, metaObj, resUtils.Scheme); err != nil {
+				panic(err)
+			}
 		}
 		//}
 		err = resUtils.Client.Create(context.TODO(), resource)
@@ -120,6 +122,11 @@ func PrepareComponentResult(res *reconcile.Result, err error) (mustReturn bool) 
 		return true
 	}
 	return false
+}
+
+func TrimFirstRune(s string) string {
+	_, i := utf8.DecodeRuneInString(s)
+	return s[i:]
 }
 
 //type resourceFactory func(name string, instance *k8sasbackendv1alpha1.K8sAsBackend) runtime.Object
