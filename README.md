@@ -19,3 +19,6 @@ The next goal is collecting the potential issues of this approach, although tech
 My current skills on *golang* are very limited. Any contribution to speed up the implementation, suggestions aimed to improve the quality of the code and the repo organization are more then welcome.
 
 I'm currently grabbing existing code samples from [multiple sources](notes.md) to quickly match the goal described above so prove the technical feasibility.
+
+## Kubernetes Operator
+I'm also working on a [k8s operator](operator/README.md) to deploy and monitor the described solution.
