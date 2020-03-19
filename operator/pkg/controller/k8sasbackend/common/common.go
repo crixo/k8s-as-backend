@@ -129,6 +129,14 @@ func TrimFirstRune(s string) string {
 	return s[i:]
 }
 
+func GetEnv(key string, defaultVal string) string {
+	if value, exists := os.LookupEnv(key); exists {
+		return value
+	}
+
+	return defaultVal
+}
+
 //type resourceFactory func(name string, instance *k8sasbackendv1alpha1.K8sAsBackend) runtime.Object
 
 // func (r *ReconcileK8sAsBackend) ensureResource(request reconcile.Request,

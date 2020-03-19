@@ -3,6 +3,8 @@ package k8sasbackend
 import (
 	"context"
 	"fmt"
+	"os"
+	"path"
 
 	k8sasbackendv1alpha1 "github.com/crixo/k8s-as-backend/operator/pkg/apis/k8sasbackend/v1alpha1"
 	authz "github.com/crixo/k8s-as-backend/operator/pkg/controller/k8sasbackend/authz"
@@ -31,6 +33,7 @@ var (
 	webhookServer       *webhookserver.WebhookServer
 	todoApp             *todoapp.TodoApp
 	log                 logr.Logger = common.Log
+	pemFolder                       = common.GetEnv("PEM_FOLDER", os.TempDir()) //pflag.String("pem-folder", "/tmp", "Folder where pem files will be stored during the container lifetime")
 )
 
 /**
@@ -59,11 +62,13 @@ func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 
 	authorization = authz.NewAuthz(mgr)
 
+	log.Info("Reconciler configuration", "pemFolder", pemFolder)
+
 	certCl, _ := certv1beta1.NewForConfig(mgr.GetConfig())
 	webhookServer = webhookserver.NewWebhookServer(reconciler.Client,
 		reconciler.Scheme,
-		"/Users/cristiano/Coding/golang/k8s-as-backend/operator/certs/server-cert.pem",
-		"/Users/cristiano/Coding/golang/k8s-as-backend/operator/certs/server-key.pem",
+		path.Join(pemFolder, "server-cert.pem"),
+		path.Join(pemFolder, "server-key.pem"),
 		certCl.CertificateSigningRequests(),
 	)
 

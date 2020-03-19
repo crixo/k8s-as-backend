@@ -1,6 +1,7 @@
 package webhookserver
 
 import (
+	"context"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
@@ -29,6 +30,16 @@ func (ws WebhookServer) ensureSecret(i *k8sasbackendv1alpha1.K8sAsBackend) (*rec
 		common.Log.Info("createCertIfNeeded request a requeue")
 		return &reconcile.Result{Requeue: true}, err
 	}
+
+	i.Status.AdmissionWebhookPems = []string{
+		ws.CerFilePath,
+		ws.KeyFilePath,
+	}
+	err = ws.Client.Status().Update(context.TODO(), i)
+	if err != nil {
+		return &reconcile.Result{}, err
+	}
+
 	//TODO: if certs have been recreated and secret already exists, delete it
 
 	resUtils := &common.ResourceUtils{

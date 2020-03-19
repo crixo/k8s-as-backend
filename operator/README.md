@@ -59,9 +59,14 @@ kubectl apply -f deploy/crds/k8s-as-backend.example.com_v1alpha1_k8sasbackend_cr
 ```
 Go back to the terminal/tab where is running the operaror app. You should see a lot of logs describing the tasks accomplished and the deployed resources. 
 
+- Verify the CR has been updated by the deployment workflow adding the PEM just created or founded.
+```
+kubectl get k8sasbackends.k8s-as-backend.example.com  example-k8sasbackend -o yaml
+```
+
 - Open the browser and test the app
 
-Use the [TodoApp](http://localhost/default/example-k8sasbackend/todo-app/swagger-ui) that expose your business app. Create some todo and browse it through the swagger ui. *code* property value has to be unique within your app scope otherwise the request will fail.
+Use the [TodoApp](http://localhost/default/example-kk8sasbackend/todo-app/swagger-ui) that expose your business app. Create some todo and browse it through the swagger ui. *code* property value has to be unique within your app scope otherwise the request will fail.
 
 - Check containers log to ensure the full workflow
 ```
