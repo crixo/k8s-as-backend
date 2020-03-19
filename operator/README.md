@@ -66,7 +66,7 @@ kubectl get k8sasbackends.k8s-as-backend.example.com  example-k8sasbackend -o ya
 
 - Open the browser and test the app
 
-Use the [TodoApp](http://localhost/default/example-kk8sasbackend/todo-app/swagger-ui) that expose your business app. Create some todo and browse it through the swagger ui. *code* property value has to be unique within your app scope otherwise the request will fail.
+Use the [TodoApp](http://localhost/default/example-k8sasbackend/todo-app/swagger-ui/index.html) that expose your business app. Create some todo and browse it through the swagger ui. *code* property value has to be unique within your app scope otherwise the request will fail.
 
 - Check containers log to ensure the full workflow
 ```
