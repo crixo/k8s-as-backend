@@ -6,7 +6,7 @@ you have to install the following dependencies
 - docker engine (eg. [docker for desktop](https://docs.docker.com/install/)  for windows and mac users)
 - [kind](https://kind.sigs.k8s.io/) The *right way* to have k8s locally - v0.6.0 w/ k8s image v1.16.3
 - [golang 1.13`*`](https://golang.org/doc/install) *THE* k8s programming language
-- [operator-sdk`*`](https://github.com/operator-framework/operator-sdk) - v0.15.2 The framework selected to build k8s operator
+- [operator-SDK`*`](https://github.com/operator-framework/operator-sdk) - v0.15.2 The framework selected to build k8s operator
 
 `*` required only to simplify development and debugging activities. The final solution, as per [operator pattern](https://kubernetes.io/docs/concepts/extend-kubernetes/operator/), runs within a docker container inside the k8s cluster. 
 
@@ -25,7 +25,7 @@ sh create-cluster.sh
 cd ..
 ```
 
-- Deploy operator **C**ustom**R**esource**D**efinition
+- Deploy operator **CustomResourceDefinition**
 
 ```
 cd operator
@@ -42,7 +42,7 @@ All the docker images currently part of the workload are stored on the public do
 sh kind/preload-image.sh
 ```
 
-Before running the app, make sure no PEM files are still present at ~/operator/certs.  You need at least a set of new pem anytime you create a new k8s cluster. Certs folder clean up will be addressed in future releases.
+Before running the app, make sure no PEM files are still present at ~/operator/certs.  You need at least a set of new PEM anytime you create a new k8s cluster. Certs folder clean up will be addressed in future releases.
 
 The app will be in interactive mode sending logs to stdout
 ```
@@ -51,13 +51,13 @@ operator-sdk run --local --namespace=default
 ```
 You'll get some initial log reflecting the current operator configuration, then app waits for works to do through CR, the next step.
 
-- Deploy your first operator **C**ustom**R**esource
+- Deploy your first operator **CustomResource**
 Open a dedicated terminal tab pointing to repo root.
 ```
 cd operator
 kubectl apply -f deploy/crds/k8s-as-backend.example.com_v1alpha1_k8sasbackend_cr.yaml
 ```
-Go back to the terminal/tab where is running the operaror app. You should see a lot of logs describing the tasks accomplished and the deployed resources. 
+Go back to the terminal/tab where is running the operator app. You should see a lot of logs describing the tasks accomplished and the deployed resources. 
 
 - Verify the CR has been updated by the deployment workflow adding the PEM just created or founded.
 ```
