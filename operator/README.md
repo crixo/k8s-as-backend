@@ -62,7 +62,12 @@ Go back to the terminal/tab where is running the operator app. You should see a 
 
 - Verify the CR has been updated by the deployment workflow adding the PEM just created or founded.
 ```
-kubectl get k8sasbackends.k8s-as-backend.example.com  example-k8sasbackend -o yaml
+kubectl get k8sasbackends.k8s-as-backend.example.com  kab01 -o yaml
+```
+
+- Verify main secondary resources has been successfully deployed
+```
+kubectl get all
 ```
 
 - Open the browser and test the app
@@ -71,11 +76,11 @@ Use the [TodoApp](http://localhost/default/kab01/todo-app/swagger-ui/index.html)
 
 - Check containers log to ensure the full workflow
 ```
-k get po
+kubectl get po
 # check admission controller logs
-k logs k8s-as-backend-webhook-server-USE_YOUR_DEPLOYMENT_UNIQUE_IDENTIFIER
+kubectl logs kab01-todos-webhook-server-USE_YOUR_DEPLOYMENT_UNIQUE_IDENTIFIER
 # check infomer logs
-k logs todo-app-USE_YOUR_DEPLOYMENT_UNIQUE_IDENTIFIER -c informer
+kubectl logs todo-app-USE_YOUR_DEPLOYMENT_UNIQUE_IDENTIFIER -c informer
 ```
 
 ## Browse the operator instance via api-server
