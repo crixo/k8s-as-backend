@@ -7,8 +7,8 @@ if [ -z "$CLUSTER_NAME" ]; then
 fi
 
 declare -a arr=("crixo/k8s-as-backend-todo-app:v0.0.0" 
-                "crixo/k8s-as-backend-informer:v.0.0.0"
-                "crixo/k8s-as-backend-webhook-server:v.0.0.0"
+                "crixo/k8s-as-backend-informer:v0.0.0"
+                "crixo/k8s-as-backend-webhook-server:v0.0.0"
                 "bitnami/kubectl:1.16"
                 )
 

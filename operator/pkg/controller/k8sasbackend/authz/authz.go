@@ -13,9 +13,8 @@ import (
 
 //TODO: make secondary resource names unique
 var (
-	ServiceAccountName string      = "todo-crd"
-	roleBindingName    string      = "todo-crd"
-	log                logr.Logger = common.Log
+	BaseName string      = "todo-crd"
+	log      logr.Logger = common.Log
 )
 
 type Authz struct {

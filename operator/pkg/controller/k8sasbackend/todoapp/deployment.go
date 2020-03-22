@@ -21,15 +21,18 @@ func (t TodoApp) ensureDeployment(i *k8sasbackendv1alpha1.K8sAsBackend) (*reconc
 		ResourceFactory: createDeployment,
 	}
 
+	deploymentName := common.CreateUniqueSecondaryResourceName(i, BaseName)
 	nsn := types.NamespacedName{Name: deploymentName, Namespace: i.Namespace}
 	found := &appsv1.Deployment{}
 	return nil, common.EnsureResource(found, nsn, i, resUtils)
 }
 
 func createDeployment(resNamespacedName types.NamespacedName, i *k8sasbackendv1alpha1.K8sAsBackend) runtime.Object {
-	image := "crixo/k8s-as-backend-todo-app:v0.0.0"
+	image := common.CreateImageName(i, todoAppImage)
+	informerImage := common.CreateImageName(i, common.InformerImage)
 	var replicas int32 = 1
-
+	matchingLabels := common.CreateMatchingLabels(i, BaseName)
+	serviceAccountName := common.CreateUniqueSecondaryResourceName(i, authz.BaseName)
 	return &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      resNamespacedName.Name,
@@ -45,11 +48,11 @@ func createDeployment(resNamespacedName types.NamespacedName, i *k8sasbackendv1a
 					Labels: matchingLabels,
 				},
 				Spec: corev1.PodSpec{
-					ServiceAccountName: authz.ServiceAccountName,
+					ServiceAccountName: serviceAccountName,
 					Containers: []corev1.Container{{
 						Image: image,
 						//ImagePullPolicy: corev1.PullAlways,
-						Name: deploymentName,
+						Name: "todo-app",
 						Ports: []corev1.ContainerPort{{
 							ContainerPort: int32(todoPort),
 							//Name:          "visitors",
@@ -79,7 +82,7 @@ func createDeployment(resNamespacedName types.NamespacedName, i *k8sasbackendv1a
 						},
 					},
 						{
-							Image: "crixo/k8s-as-backend-informer:v.0.0.0",
+							Image: informerImage,
 							Name:  "informer",
 							Ports: []corev1.ContainerPort{{
 								ContainerPort: kubectlApiPort,
@@ -100,7 +103,7 @@ func createDeployment(resNamespacedName types.NamespacedName, i *k8sasbackendv1a
 							},
 						},
 						{
-							Image: "bitnami/kubectl:1.16",
+							Image: kubectlImage,
 							Name:  "kubectl",
 							Ports: []corev1.ContainerPort{{
 								ContainerPort: kubectlApiPort,

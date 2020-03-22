@@ -10,7 +10,7 @@ go mod vendor
 
 - build the docker image
 ```
-docker build -t crixo/k8s-as-backend-informer:v.0.0.0 .
+docker build -t crixo/k8s-as-backend-informer:v0.0.0 .
 ```
 
 - laod image in kind

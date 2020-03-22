@@ -18,13 +18,14 @@ func (t TodoApp) ensureService(i *k8sasbackendv1alpha1.K8sAsBackend) (*reconcile
 		ResourceFactory: createService,
 	}
 
+	serviceName := common.CreateUniqueSecondaryResourceName(i, BaseName)
 	nsn := types.NamespacedName{Name: serviceName, Namespace: i.Namespace}
 	found := &corev1.Service{}
 	return nil, common.EnsureResource(found, nsn, i, resUtils)
 }
 
 func createService(nsn types.NamespacedName, i *k8sasbackendv1alpha1.K8sAsBackend) runtime.Object {
-
+	matchingLabels := common.CreateMatchingLabels(i, BaseName)
 	return &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      nsn.Name,
@@ -34,7 +35,7 @@ func createService(nsn types.NamespacedName, i *k8sasbackendv1alpha1.K8sAsBacken
 			Selector: matchingLabels,
 			Ports: []corev1.ServicePort{{
 				Protocol:   corev1.ProtocolTCP,
-				Port:       int32(svcPort),
+				Port:       int32(SvcPort),
 				TargetPort: intstr.FromInt(todoPort),
 			}},
 		},

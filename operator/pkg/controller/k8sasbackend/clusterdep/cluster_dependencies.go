@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	ValidationWebhookConfigurationName string      = "admission-webhook-example-validation-webhook"
+	ValidationWebhookConfigurationName string      = "kab-todos"
 	TodosCrdName                       string      = "todos.k8sasbackend.com"
 	log                                logr.Logger = common.Log
 	//caBundle []byte      = common.AppState.ClientConfig.CAData

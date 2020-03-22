@@ -18,6 +18,8 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
+	"os"
 
 	"github.com/crixo/k8s-as-backend/webhook-server/restclient"
 	"go.uber.org/zap"
@@ -46,7 +48,14 @@ func admitCRD(ar v1.AdmissionReview) *v1.AdmissionResponse {
 	rawJson := string(raw)
 	logger.With(zap.String("raw", rawJson)).Info("ar.Request.Object.Raw")
 
-	host := "http://todo-app-svc:5000"
+	envKey := "TODO_APP_SVC"
+	host := ""
+	if value, exists := os.LookupEnv(envKey); exists {
+		host = value
+	} else {
+		panic(fmt.Sprintf("The %s env variable is mandatory"))
+	}
+	//host := "http://todo-app-svc:5000"
 	message := map[string]interface{}{
 		"raw": rawJson,
 	}

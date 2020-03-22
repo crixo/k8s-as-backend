@@ -23,8 +23,26 @@ import (
 	"k8s.io/client-go/rest"
 )
 
-var Log = logf.Log.WithName("controller_k8sasbackend")
-var AppState = &State{}
+var (
+	Log                  = logf.Log.WithName("controller_k8sasbackend")
+	AppState             = &State{}
+	InformerImage string = "crixo/k8s-as-backend-informer"
+)
+
+//type UniqueSecondaryResourceNameFactory func(crName string) string
+func CreateUniqueSecondaryResourceName(i *k8sasbackendv1alpha1.K8sAsBackend, baseName string) string {
+	return fmt.Sprintf("%s-%s", i.Name, baseName)
+}
+
+func CreateMatchingLabels(i *k8sasbackendv1alpha1.K8sAsBackend, baseName string) map[string]string {
+	return map[string]string{
+		"app": CreateUniqueSecondaryResourceName(i, baseName),
+	}
+}
+
+func CreateImageName(i *k8sasbackendv1alpha1.K8sAsBackend, imageName string) string {
+	return fmt.Sprintf("%s:%s", imageName, i.Spec.ProductVersion)
+}
 
 func GetKind(obj runtime.Object) string {
 	return fmt.Sprintf("%T", obj)

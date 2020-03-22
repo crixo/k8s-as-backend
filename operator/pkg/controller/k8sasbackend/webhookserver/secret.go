@@ -7,6 +7,7 @@ import (
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/pem"
+	"fmt"
 	"io/ioutil"
 	"os"
 
@@ -22,8 +23,8 @@ import (
 )
 
 func (ws WebhookServer) ensureSecret(i *k8sasbackendv1alpha1.K8sAsBackend) (*reconcile.Result, error) {
-	//_, err := ws.createCertIfNeeded()
-	requeue, err := ws.createCertIfNeeded()
+	sharedResourceName := common.CreateUniqueSecondaryResourceName(i, baseName)
+	requeue, err := ws.createCertIfNeeded(sharedResourceName, i.Namespace)
 	if err != nil {
 		return &reconcile.Result{}, err
 	} else if requeue {
@@ -48,6 +49,7 @@ func (ws WebhookServer) ensureSecret(i *k8sasbackendv1alpha1.K8sAsBackend) (*rec
 		ResourceFactory: ws.createSecret,
 	}
 
+	secretName := common.CreateUniqueSecondaryResourceName(i, baseName)
 	nsn := types.NamespacedName{Name: secretName, Namespace: i.Namespace}
 	found := &corev1.Secret{}
 	err = common.EnsureResource(found, nsn, i, resUtils)
@@ -55,21 +57,21 @@ func (ws WebhookServer) ensureSecret(i *k8sasbackendv1alpha1.K8sAsBackend) (*rec
 	return nil, err
 }
 
-func (ws WebhookServer) createCertIfNeeded() (requeue bool, err error) {
+func (ws WebhookServer) createCertIfNeeded(sharedResourceName, namespace string) (requeue bool, err error) {
 	if common.FileNotExists(ws.CerFilePath) {
 
 		//found := &v1beta1.CertificateSigningRequest{}
 		//nsName := types.NamespacedName{Name: csrName, Namespace: ""}
 		//err := ws.Client.Get(context.TODO(), nsName, found)
 
-		found, err := ws.CertClient.Get(csrName, metav1.GetOptions{})
+		found, err := ws.CertClient.Get(sharedResourceName, metav1.GetOptions{})
 		if err != nil && errors.IsNotFound(err) {
-			certRequest := ws.createKeyAndCertRequestAsPem()
-			err := ws.createSigningRequest(certRequest)
+			certRequest := ws.createKeyAndCertRequestAsPem(sharedResourceName, namespace)
+			err := ws.createSigningRequest(sharedResourceName, certRequest)
 			if err != nil {
 				panic(err)
 			}
-			err = ws.approveCertificate()
+			err = ws.approveCertificate(sharedResourceName)
 			if err != nil {
 				panic(err)
 			}
@@ -106,7 +108,7 @@ func (ws WebhookServer) createSecret(nsName types.NamespacedName, i *k8sasbacken
 	})
 }
 
-func (ws WebhookServer) approveCertificate() error {
+func (ws WebhookServer) approveCertificate(csrName string) error {
 
 	// found := &v1beta1.CertificateSigningRequest{}
 	// nsName := types.NamespacedName{Name: csrName, Namespace: ""}
@@ -138,7 +140,8 @@ func (ws WebhookServer) storeCertificateAsPem(cert []byte) error {
 	return err
 }
 
-func (ws WebhookServer) createKeyAndCertRequestAsPem() (csrPem []byte) {
+func (ws WebhookServer) createKeyAndCertRequestAsPem(webhookServerServiceName, namespace string) (csrPem []byte) {
+
 	keyBytes, _ := rsa.GenerateKey(rand.Reader, 2048)
 	keyfile, _ := os.Create(ws.KeyFilePath)
 	defer keyfile.Close()
@@ -147,7 +150,7 @@ func (ws WebhookServer) createKeyAndCertRequestAsPem() (csrPem []byte) {
 		Bytes: x509.MarshalPKCS1PrivateKey(keyBytes)})
 
 	subj := pkix.Name{
-		CommonName: "admission-webhook-example-svc.default.svc",
+		CommonName: fmt.Sprintf("%s.%s.svc", webhookServerServiceName, namespace),
 		// Country:            []string{"AU"},
 		// Province:           []string{"Some-State"},
 		// Locality:           []string{"MyCity"},
@@ -163,9 +166,10 @@ func (ws WebhookServer) createKeyAndCertRequestAsPem() (csrPem []byte) {
 		//EmailAddresses:     []string{emailAddress},
 		SignatureAlgorithm: x509.SHA256WithRSA,
 		DNSNames: []string{
-			"admission-webhook-example-svc",
-			"admission-webhook-example-svc.default",
-			"admission-webhook-example-svc.default.svc"},
+			webhookServerServiceName,
+			fmt.Sprintf("%s.%s", webhookServerServiceName, namespace),
+			fmt.Sprintf("%s.%s.svc", webhookServerServiceName, namespace),
+		},
 	}
 
 	csr, _ := x509.CreateCertificateRequest(rand.Reader, &template, keyBytes)
@@ -176,7 +180,7 @@ func (ws WebhookServer) createKeyAndCertRequestAsPem() (csrPem []byte) {
 	return
 }
 
-func (ws WebhookServer) createSigningRequest(request []byte) error {
+func (ws WebhookServer) createSigningRequest(csrName string, request []byte) error {
 	// name := "admission-webhook-example-svc.default"
 
 	res := &v1beta1.CertificateSigningRequest{

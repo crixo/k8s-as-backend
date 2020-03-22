@@ -16,17 +16,14 @@ import (
 
 //TODO: make secondary resource names unique
 var (
-	todoAppUrlSegmentIdentifier string            = "todo-app"
-	deploymentName              string            = "todo-app"
-	serviceName                 string            = "todo-app-svc"
-	ingressName                 string            = "todo-app-ingress"
-	svcPort                     int               = 5000
-	todoPort                    int               = 80
-	kubectlApiPort              int32             = 8080
-	matchingLabels              map[string]string = map[string]string{
-		"app": "todo-app",
-	}
-	log logr.Logger = common.Log
+	todoAppUrlSegmentIdentifier string      = "todo-app"
+	BaseName                    string      = "todo-app"
+	todoAppImage                string      = "crixo/k8s-as-backend-todo-app"
+	kubectlImage                string      = "bitnami/kubectl:1.16"
+	SvcPort                     int         = 5000
+	todoPort                    int         = 80
+	kubectlApiPort              int32       = 8080
+	log                         logr.Logger = common.Log
 	//caBundle []byte      = common.AppState.ClientConfig.CAData
 )
 

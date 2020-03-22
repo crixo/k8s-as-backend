@@ -31,6 +31,8 @@ spec:
         spec:
           description: K8sAsBackendSpec defines the desired state of K8sAsBackend
           properties:
+            productVersion:
+              type: string
             size:
               description: 'INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
                 Important: Run "operator-sdk generate k8s" to regenerate code after
@@ -39,11 +41,16 @@ spec:
               format: int32
               type: integer
           required:
+          - productVersion
           - size
           type: object
         status:
           description: K8sAsBackendStatus defines the observed state of K8sAsBackend
           properties:
+            apps:
+              items:
+                type: string
+              type: array
             pems:
               items:
                 type: string

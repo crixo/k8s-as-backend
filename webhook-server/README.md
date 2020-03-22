@@ -12,7 +12,7 @@ go mod vendor
 
 - build the docker image
 ```
-docker build -t crixo/k8s-as-backend-webhook-server:v.0.0.0 .
+docker build -t crixo/k8s-as-backend-webhook-server:v0.0.0 .
 ```
 
 - load image in kind

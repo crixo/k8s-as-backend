@@ -30,7 +30,7 @@ func (ws WebhookServer) ensureValidationWebhook(i *k8sasbackendv1alpha1.K8sAsBac
 	}
 
 	desiredWh := createValidationWebhook(i)
-	currentWebhook, foundIdx := findWebhook(found, vebhookName)
+	currentWebhook, foundIdx := findWebhook(found, todosWebhookName)
 	if currentWebhook != nil && reflect.DeepEqual(currentWebhook, desiredWh) {
 		return nil, nil
 	}
@@ -71,8 +71,9 @@ func createValidationWebhook(i *k8sasbackendv1alpha1.K8sAsBackend) arv1beta1.Val
 	sideEffects := arv1beta1.SideEffectClassNone
 	caBundle := common.AppState.ClientConfig.CAData
 	var timeout int32 = 5
+	serviceName := common.CreateUniqueSecondaryResourceName(i, baseName)
 	return arv1beta1.ValidatingWebhook{
-		Name: vebhookName,
+		Name: todosWebhookName,
 		Rules: []arv1beta1.RuleWithOperations{{
 			Rule: arv1beta1.Rule{
 				APIGroups:   []string{"k8sasbackend.com"},

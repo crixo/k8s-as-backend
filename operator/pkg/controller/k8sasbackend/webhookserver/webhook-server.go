@@ -2,7 +2,7 @@ package webhookserver
 
 import (
 	k8sasbackendv1alpha1 "github.com/crixo/k8s-as-backend/operator/pkg/apis/k8sasbackend/v1alpha1"
-	"github.com/crixo/k8s-as-backend/operator/pkg/controller/k8sasbackend/common"
+	common "github.com/crixo/k8s-as-backend/operator/pkg/controller/k8sasbackend/common"
 	"github.com/go-logr/logr"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -16,17 +16,14 @@ import (
 
 //TODO: make secondary resource names unique
 var (
-	csrName    string = "admission-webhook-example-svc.default"
-	secretName string = "admission-webhook-example-certs"
-	//ValidationWebhookName string            = "admission-webhook-example-validation-webhook"
-	vebhookName    string            = "todos.webhook.example" //should be a domain with at least three segments separated by dots
-	deploymentName string            = "k8s-as-backend-webhook-server"
-	serviceName    string            = "admission-webhook-example-svc"
-	port           int               = 443
-	matchingLabels map[string]string = map[string]string{
-		"app": "k8s-as-backend-webhook-server",
-	}
-	log logr.Logger = common.Log
+	//csrName string = "admission-webhook-example-svc.default"
+	//should be a domain with at least three segments separated by dots
+	todosWebhookName string = "todos.webhook.example"
+	// all resources of different kind belonging to the same app uses same name
+	baseName                               = "todos-webhook-server"
+	todosAdmissionWebhookImage             = "crixo/k8s-as-backend-webhook-server"
+	port                       int         = 443
+	log                        logr.Logger = common.Log
 	//caBundle []byte      = common.AppState.ClientConfig.CAData
 )
 

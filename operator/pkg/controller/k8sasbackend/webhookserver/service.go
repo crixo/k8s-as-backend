@@ -18,13 +18,14 @@ func (ws WebhookServer) ensureService(i *k8sasbackendv1alpha1.K8sAsBackend) (*re
 		ResourceFactory: createService,
 	}
 
+	serviceName := common.CreateUniqueSecondaryResourceName(i, baseName)
 	nsn := types.NamespacedName{Name: serviceName, Namespace: i.Namespace}
 	found := &corev1.Service{}
 	return nil, common.EnsureResource(found, nsn, i, resUtils)
 }
 
 func createService(nsn types.NamespacedName, i *k8sasbackendv1alpha1.K8sAsBackend) runtime.Object {
-
+	matchingLabels := common.CreateMatchingLabels(i, baseName)
 	return &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      nsn.Name,

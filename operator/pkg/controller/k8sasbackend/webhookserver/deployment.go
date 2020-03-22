@@ -1,8 +1,11 @@
 package webhookserver
 
 import (
+	"fmt"
+
 	k8sasbackendv1alpha1 "github.com/crixo/k8s-as-backend/operator/pkg/apis/k8sasbackend/v1alpha1"
 	common "github.com/crixo/k8s-as-backend/operator/pkg/controller/k8sasbackend/common"
+	"github.com/crixo/k8s-as-backend/operator/pkg/controller/k8sasbackend/todoapp"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -18,19 +21,23 @@ func (ws WebhookServer) ensureDeployment(i *k8sasbackendv1alpha1.K8sAsBackend) (
 		ResourceFactory: createDeployment,
 	}
 
+	deploymentName := common.CreateUniqueSecondaryResourceName(i, baseName)
 	nsn := types.NamespacedName{Name: deploymentName, Namespace: i.Namespace}
 	found := &appsv1.Deployment{}
 	return nil, common.EnsureResource(found, nsn, i, resUtils)
 }
 
-func createDeployment(resNamespacedName types.NamespacedName, i *k8sasbackendv1alpha1.K8sAsBackend) runtime.Object {
-	image := "crixo/k8s-as-backend-webhook-server:v.0.0.0"
+func createDeployment(nsn types.NamespacedName, i *k8sasbackendv1alpha1.K8sAsBackend) runtime.Object {
+	image := common.CreateImageName(i, todosAdmissionWebhookImage)
 	var replicas int32 = 1
-
+	matchingLabels := common.CreateMatchingLabels(i, baseName)
+	secretName := common.CreateUniqueSecondaryResourceName(i, baseName)
+	todoAppServiceName := common.CreateUniqueSecondaryResourceName(i, todoapp.BaseName)
+	todoAppServiceUrl := fmt.Sprintf("http://%s:%d", todoAppServiceName, todoapp.SvcPort)
 	return &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      resNamespacedName.Name,
-			Namespace: resNamespacedName.Namespace,
+			Name:      nsn.Name,
+			Namespace: nsn.Namespace,
 		},
 		Spec: appsv1.DeploymentSpec{
 			Replicas: &replicas,
@@ -45,7 +52,7 @@ func createDeployment(resNamespacedName types.NamespacedName, i *k8sasbackendv1a
 					Containers: []corev1.Container{{
 						Image: image,
 						//ImagePullPolicy: corev1.PullAlways,
-						Name: deploymentName,
+						Name: "admission-webhook",
 						Ports: []corev1.ContainerPort{{
 							ContainerPort: 443,
 							//Name:          "visitors",
@@ -55,12 +62,12 @@ func createDeployment(resNamespacedName types.NamespacedName, i *k8sasbackendv1a
 							"-tls-private-key-file=/etc/webhook/certs/key.pem",
 							"-v=2",
 						},
-						// Env: []corev1.EnvVar{
-						// 	{
-						// 		Name:  "MYSQL_DATABASE",
-						// 		Value: "visitors",
-						// 	},
-						// },
+						Env: []corev1.EnvVar{
+							{
+								Name:  "TODO_APP_SVC",
+								Value: todoAppServiceUrl,
+							},
+						},
 						VolumeMounts: []corev1.VolumeMount{{
 							Name:      "webhook-certs",
 							MountPath: "/etc/webhook/certs",

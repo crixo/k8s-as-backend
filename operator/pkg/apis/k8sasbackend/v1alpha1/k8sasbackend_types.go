@@ -12,7 +12,8 @@ type K8sAsBackendSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "operator-sdk generate k8s" to regenerate code after modifying this file
 	// Add custom validation using kubebuilder tags: https://book-v1.book.kubebuilder.io/beyond_basics/generating_crd.html
-	Size int32 `json:"size"`
+	Size           int32  `json:"size"`
+	ProductVersion string `json:"productVersion"`
 }
 
 // K8sAsBackendStatus defines the observed state of K8sAsBackend
@@ -24,6 +25,10 @@ type K8sAsBackendStatus struct {
 	// +optional
 	// +listType=set
 	AdmissionWebhookPems []string `json:"pems,omitempty"`
+
+	// +optional
+	// +listType=set
+	DeployedApps []string `json:"apps,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

@@ -93,6 +93,11 @@ func (in *K8sAsBackendStatus) DeepCopyInto(out *K8sAsBackendStatus) {
 		*out = make([]string, len(*in))
 		copy(*out, *in)
 	}
+	if in.DeployedApps != nil {
+		in, out := &in.DeployedApps, &out.DeployedApps
+		*out = make([]string, len(*in))
+		copy(*out, *in)
+	}
 	return
 }
 

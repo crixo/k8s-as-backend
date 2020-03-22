@@ -19,9 +19,10 @@ A 3 node cluster (1 master, 2 workers) will be created with a nginx-controller c
 The nginx-controller uses ports 80 and 443: make sure you do not have other services currently running on those port otherwise the installation will fail.
 ```
 cd kind
-#proposed default cluster name works just fine
+# proposed default cluster name works just fine
 sh create-cluster.sh 
-# wait until done ~1 minute
+# wait until done at least the cluster creation itself (~1 minute)
+# nginx-ingress-controller installation&checks may take a bit longer
 cd ..
 ```
 
@@ -55,7 +56,7 @@ You'll get some initial log reflecting the current operator configuration, then 
 Open a dedicated terminal tab pointing to repo root.
 ```
 cd operator
-kubectl apply -f deploy/crds/k8s-as-backend.example.com_v1alpha1_k8sasbackend_cr.yaml
+kubectl apply -f deploy/crds/kab01.yaml
 ```
 Go back to the terminal/tab where is running the operator app. You should see a lot of logs describing the tasks accomplished and the deployed resources. 
 
@@ -66,7 +67,7 @@ kubectl get k8sasbackends.k8s-as-backend.example.com  example-k8sasbackend -o ya
 
 - Open the browser and test the app
 
-Use the [TodoApp](http://localhost/default/example-k8sasbackend/todo-app/swagger-ui/index.html) that expose your business app. Create some todo and browse it through the swagger ui. *code* property value has to be unique within your app scope otherwise the request will fail.
+Use the [TodoApp](http://localhost/default/kab01/todo-app/swagger-ui/index.html) that expose your business app. Create some todo and browse it through the swagger ui. *code* property value has to be unique within your app scope otherwise the request will fail.
 
 - Check containers log to ensure the full workflow
 ```
@@ -77,10 +78,24 @@ k logs k8s-as-backend-webhook-server-USE_YOUR_DEPLOYMENT_UNIQUE_IDENTIFIER
 k logs todo-app-USE_YOUR_DEPLOYMENT_UNIQUE_IDENTIFIER -c informer
 ```
 
+## Browse the operator instance via api-server
+Start api-server proxy into a dedicated terminal tab
+```
+kubectl proxy
+```
+then you can get [all the endpoints/paths exposed by the api-server](http://127.0.0.1:8001).  
+The paths list includes k8s built-in paths and custom paths created through CRDs.
+
+You can browse your CRDs definitions and CR instances through api server:
+- [operator CRD](http://127.0.0.1:8001/apis/k8s-as-backend.example.com/v1alpha1)
+- [operator CRs/instances](http://127.0.0.1:8001/apis/k8s-as-backend.example.com/v1alpha1/k8sasbackends) 
+- [operator CRs/instances by namespace](http://127.0.0.1:8001/apis/k8s-as-backend.example.com/v1alpha1/namespaces/default/k8sasbackends)
+- [operator CR/instance by namespace and name](http://127.0.0.1:8001/apis/k8s-as-backend.example.com/v1alpha1/namespaces/default/k8sasbackends/kab01)
+
 - Clean up everything
 ```
 cd operator
-kubectl delete -f deploy/crds/k8s-as-backend.example.com_v1alpha1_k8sasbackend_cr.yaml
+kubectl delete -f deploy/crds/kab01.yaml
 ```
 At the present cluster-wide resource are not removed if no longer needed
 

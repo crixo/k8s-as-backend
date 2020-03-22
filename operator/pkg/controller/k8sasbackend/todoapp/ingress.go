@@ -20,17 +20,19 @@ func (t TodoApp) ensureIngress(i *k8sasbackendv1alpha1.K8sAsBackend) (*reconcile
 		ResourceFactory: createIngress,
 	}
 
-	nsn := types.NamespacedName{Name: deploymentName, Namespace: i.Namespace}
+	ingressName := common.CreateUniqueSecondaryResourceName(i, BaseName)
+	nsn := types.NamespacedName{Name: ingressName, Namespace: i.Namespace}
 	found := &extv1beta1.Ingress{}
 	return nil, common.EnsureResource(found, nsn, i, resUtils)
 }
 
 func createIngress(resNamespacedName types.NamespacedName, i *k8sasbackendv1alpha1.K8sAsBackend) runtime.Object {
 
+	serviceName := common.CreateUniqueSecondaryResourceName(i, BaseName)
 	path := fmt.Sprintf("/%s/%s/%s(/|$)(.*)", i.Namespace, i.Name, todoAppUrlSegmentIdentifier)
 	backend := &extv1beta1.IngressBackend{
 		ServiceName: serviceName,
-		ServicePort: intstr.FromInt(svcPort),
+		ServicePort: intstr.FromInt(SvcPort),
 	}
 
 	return &extv1beta1.Ingress{

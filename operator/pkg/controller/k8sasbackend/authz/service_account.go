@@ -17,7 +17,8 @@ func (a Authz) ensureAccount(i *k8sasbackendv1alpha1.K8sAsBackend) (*reconcile.R
 		ResourceFactory: createAccount,
 	}
 
-	nsn := types.NamespacedName{Name: ServiceAccountName, Namespace: i.Namespace}
+	serviceAccountName := common.CreateUniqueSecondaryResourceName(i, BaseName)
+	nsn := types.NamespacedName{Name: serviceAccountName, Namespace: i.Namespace}
 	found := &corev1.ServiceAccount{}
 	return nil, common.EnsureResource(found, nsn, i, resUtils)
 }

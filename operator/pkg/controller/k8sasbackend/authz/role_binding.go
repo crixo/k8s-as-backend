@@ -17,6 +17,7 @@ func (a Authz) ensureRoleBinding(i *k8sasbackendv1alpha1.K8sAsBackend) (*reconci
 		ResourceFactory: createRoleBinding,
 	}
 
+	roleBindingName := common.CreateUniqueSecondaryResourceName(i, BaseName)
 	nsn := types.NamespacedName{Name: roleBindingName, Namespace: i.Namespace}
 	found := &rbac.RoleBinding{}
 	return nil, common.EnsureResource(found, nsn, i, resUtils)
@@ -24,6 +25,7 @@ func (a Authz) ensureRoleBinding(i *k8sasbackendv1alpha1.K8sAsBackend) (*reconci
 
 func createRoleBinding(nsn types.NamespacedName, i *k8sasbackendv1alpha1.K8sAsBackend) runtime.Object {
 
+	serviceAccountName := common.CreateUniqueSecondaryResourceName(i, BaseName)
 	return &rbac.RoleBinding{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      nsn.Name,
@@ -36,7 +38,7 @@ func createRoleBinding(nsn types.NamespacedName, i *k8sasbackendv1alpha1.K8sAsBa
 		},
 		Subjects: []rbac.Subject{{
 			Kind:      "ServiceAccount",
-			Name:      ServiceAccountName,
+			Name:      serviceAccountName,
 			Namespace: i.Namespace,
 		}},
 	}
