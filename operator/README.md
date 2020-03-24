@@ -80,7 +80,7 @@ kubectl get po
 # check admission controller logs
 kubectl logs kab01-todos-webhook-server-USE_YOUR_DEPLOYMENT_UNIQUE_IDENTIFIER
 # check infomer logs
-kubectl logs todo-app-USE_YOUR_DEPLOYMENT_UNIQUE_IDENTIFIER -c informer
+kubectl logs kab01-todo-app-USE_YOUR_DEPLOYMENT_UNIQUE_IDENTIFIER -c informer
 ```
 
 ## Browse the operator instance via api-server
