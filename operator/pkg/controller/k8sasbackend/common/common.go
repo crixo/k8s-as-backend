@@ -12,6 +12,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -130,6 +131,23 @@ func EnsureResource(found runtime.Object,
 	}
 
 	return nil
+}
+
+func UpdateResource(client client.Client, found runtime.Object) (*reconcile.Result, error) {
+	metaAccessor := meta.NewAccessor()
+	kind, err := metaAccessor.Kind(found)
+	ns, err := metaAccessor.Namespace(found)
+	name, err := metaAccessor.Name(found)
+	if err != nil {
+		panic(err)
+	}
+	err = client.Update(context.TODO(), found)
+	if err != nil {
+		Log.Error(err, fmt.Sprintf("Failed to update existing %s", kind), "Namespace", ns, "Name", name)
+		return &reconcile.Result{}, err
+	}
+	// Spec updated - return and requeue
+	return &reconcile.Result{Requeue: true}, nil
 }
 
 // Component must return nil if all good

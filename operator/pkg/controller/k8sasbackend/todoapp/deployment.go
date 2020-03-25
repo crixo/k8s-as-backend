@@ -24,13 +24,25 @@ func (t TodoApp) ensureDeployment(i *k8sasbackendv1alpha1.K8sAsBackend) (*reconc
 	deploymentName := common.CreateUniqueSecondaryResourceName(i, BaseName)
 	nsn := types.NamespacedName{Name: deploymentName, Namespace: i.Namespace}
 	found := &appsv1.Deployment{}
-	return nil, common.EnsureResource(found, nsn, i, resUtils)
+	err := common.EnsureResource(found, nsn, i, resUtils)
+	log.Info("Found Deployment", "Namespace", found.Namespace, "Name", found.Name)
+	if err == nil && found.Name != "" {
+		size := i.Spec.Size
+		// TODO: handle i.Spec.ProductVersion changes
+		if size != *found.Spec.Replicas {
+			log.Info("Reconciling Size", "DesiredSize", size, "CurrentSize", &found.Spec.Replicas)
+			found.Spec.Replicas = &size
+			//TODO:
+			return common.UpdateResource(resUtils.Client, found)
+		}
+	}
+	return nil, err
 }
 
 func createDeployment(resNamespacedName types.NamespacedName, i *k8sasbackendv1alpha1.K8sAsBackend) runtime.Object {
 	image := common.CreateImageName(i, todoAppImage)
 	informerImage := common.CreateImageName(i, common.InformerImage)
-	var replicas int32 = 1
+	var replicas int32 = i.Spec.Size
 	matchingLabels := common.CreateMatchingLabels(i, BaseName)
 	serviceAccountName := common.CreateUniqueSecondaryResourceName(i, authz.BaseName)
 	return &appsv1.Deployment{
@@ -58,6 +70,7 @@ func createDeployment(resNamespacedName types.NamespacedName, i *k8sasbackendv1a
 							//Name:          "visitors",
 						}},
 						Env: []corev1.EnvVar{
+							//TODO: create env variable mapping the meta.namespace to have the api calling the ralted ns while is creating the todo-CR
 							{
 								Name:  "FullBasePath",
 								Value: fmt.Sprintf("http://localhost%s", getAppBaseUrl(i)),

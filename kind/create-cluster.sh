@@ -6,6 +6,11 @@ if [ -z "$CLUSTER_NAME" ]; then
     CLUSTER_NAME="k8s-as-backend"
 fi
 kind create cluster --config 3nodes-ingress-controller.yaml --name $CLUSTER_NAME
+
+nginxctrlimage='quay.io/kubernetes-ingress-controller/nginx-ingress-controller:master'
+docker pull $nginxctrlimage
+kind load docker-image $nginxctrlimage --name $CLUSTER_NAME --nodes='k8s-as-backend-control-plane'
+
 kubectl apply -f mandatory.yaml
 kubectl apply -f service-nodeport.yaml
 kubectl patch deployments -n ingress-nginx nginx-ingress-controller --patch "$(cat nginx-ingress-controller-deployment-patch.yaml)"

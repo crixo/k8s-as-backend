@@ -4,5 +4,5 @@ metadata:
   name: kab01
 spec:
   # Add fields here
-  size: 3
+  size: 1
   productVersion: "v0.0.0"
