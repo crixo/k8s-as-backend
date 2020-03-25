@@ -90,6 +90,7 @@ namespace TodoApi.Controllers
 
             using var stringContent = new StringContent(json, Encoding.UTF8, "application/json");
 
+            //TODO: make namespace as env variable
             var request = new HttpRequestMessage(
                 HttpMethod.Post,
                 "http://localhost:8080/apis/k8sasbackend.com/v1/namespaces/default/todos");     

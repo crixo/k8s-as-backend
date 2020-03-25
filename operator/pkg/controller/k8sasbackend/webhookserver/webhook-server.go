@@ -18,7 +18,7 @@ import (
 var (
 	//csrName string = "admission-webhook-example-svc.default"
 	//should be a domain with at least three segments separated by dots
-	todosWebhookName string = "todos.webhook.example"
+	todosWebhookBaseName string = "todos.webhook.example"
 	// all resources of different kind belonging to the same app uses same name
 	baseName                               = "todos-webhook-server"
 	todosAdmissionWebhookImage             = "crixo/k8s-as-backend-webhook-server"

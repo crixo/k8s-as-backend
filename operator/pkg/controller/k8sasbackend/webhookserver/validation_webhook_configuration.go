@@ -30,7 +30,7 @@ func (ws WebhookServer) ensureValidationWebhook(i *k8sasbackendv1alpha1.K8sAsBac
 	}
 
 	desiredWh := createValidationWebhook(i)
-	currentWebhook, foundIdx := findWebhook(found, todosWebhookName)
+	currentWebhook, foundIdx := findWebhook(found, desiredWh.Name)
 	if currentWebhook != nil && reflect.DeepEqual(currentWebhook, desiredWh) {
 		return nil, nil
 	}
@@ -70,6 +70,7 @@ func createValidationWebhook(i *k8sasbackendv1alpha1.K8sAsBackend) arv1beta1.Val
 	path := "/crd"
 	sideEffects := arv1beta1.SideEffectClassNone
 	caBundle := common.AppState.ClientConfig.CAData
+	todosWebhookName := common.CreateUniqueSecondaryResourceName(i, todosWebhookBaseName)
 	var timeout int32 = 5
 	serviceName := common.CreateUniqueSecondaryResourceName(i, baseName)
 	return arv1beta1.ValidatingWebhook{
