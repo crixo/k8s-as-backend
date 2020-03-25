@@ -26,5 +26,16 @@ Now that GO types have fields and possibly annotations, the CRD corresponding to
 operator-sdk generate crds
 ```
 
+## Testing
+run all tests in all packages
+```
+go test ./...
+```
+
+run a specific test
+```
+go test -v ./pkg/controller/k8sasbackend/webhookserver/
+```
+
 ## References
 - [Meta Accessor](https://github.com/kubernetes/apimachinery/blob/master/pkg/api/meta/meta.go)

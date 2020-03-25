@@ -43,7 +43,8 @@ All the docker images currently part of the workload are stored on the public do
 sh kind/preload-image.sh
 ```
 
-Before running the app, make sure no PEM files are still present at ~/operator/certs.  You need at least a set of new PEM anytime you create a new k8s cluster. Certs folder clean up will be addressed in future releases.
+Before running the app against a new cluster, make sure no PEM files are still present in the temp folder (default location).  
+You need at least a set of new PEM anytime you create a new k8s cluster. PEM clean up will be addressed in future releases.
 
 The app will be in interactive mode sending logs to stdout
 ```

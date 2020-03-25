@@ -28,3 +28,6 @@ I'm currently grabbing existing code samples from [multiple sources](notes.md) t
 
 ## Kubernetes Operator
 I'm also working on a [k8s operator](operator/README.md) to deploy and monitor the described solution.
+
+Project resources dependencies vs operator scope
+![](images/kab-resource-deps.png?raw=true)

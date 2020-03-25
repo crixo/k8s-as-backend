@@ -6,7 +6,7 @@ You should picturing as a (virtual) Site Reliability Engineering(SRE):
 
 - Why Operator as (GO) app  
 
-  - Operator as Helm or Ansible
+  - Operator as [Helm](https://github.com/Kong/kong-operator) or Ansible
 
   - Ensure variable references:
 
