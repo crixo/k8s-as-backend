@@ -17,7 +17,7 @@ The next goal is collecting the potential issues of this approach, although tech
 
 ## API Strategy
 Sync one-time execution vs async loop reconciliation.
-![](images/kab-API-Strategy.png?raw=true)
+![](images/kab-API-strategy.png?raw=true)
 
 Business logic applied by the k8s controller should be delegated to a queue and executed form there. K8s provides its own [queueing mechanism](https://godoc.org/k8s.io/client-go/util/workqueue).
 
