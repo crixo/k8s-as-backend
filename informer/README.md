@@ -13,7 +13,7 @@ go mod vendor
 docker build -t crixo/k8s-as-backend-informer:v0.0.0 .
 ```
 
-- laod image in kind
+- load image in kind
 ```
 kind load docker-image crixo/k8s-as-backend-informer:v.0.0.0 --name standard
 ```
@@ -40,7 +40,7 @@ http://localhost:8001/apis/k8sasbackend.com/v1/namespaces/default/todos?fieldSel
 http://localhost:8001/apis/k8sasbackend.com/v1/namespaces/default/todos?labelSelector=pippo%3Dpluto
 ```
 
-## Enable field to be used w/ fieldSeletor
+## Enable field to be used w/ field selector
 Not possible yet: [53459 Enable arbitrary CRD field selectors by supporting a whitelist of fields in CRD spec](https://github.com/kubernetes/kubernetes/issues/53459)
 
 ### How to identify fields supported by fieldSelector

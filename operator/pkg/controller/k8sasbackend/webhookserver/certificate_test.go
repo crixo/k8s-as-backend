@@ -45,9 +45,9 @@ func TestPemCreation(t *testing.T) {
 	}
 
 	csrBytes, _ := x509.CreateCertificateRequest(rand.Reader, &template, keyBytes)
-	file, _ := os.Create("/Users/cristiano/Coding/golang/k8s-as-backend/operator/server-test.csr")
-	//openssl req -in ~/Coding/golang/k8s-as-backend/operator/server-test.csr -noout -text
-	defer file.Close()
-	pem.Encode(file, &pem.Block{Type: "CERTIFICATE REQUEST", Bytes: csrBytes}) //os.Stdout
+	// file, _ := os.Create("/Users/cristiano/Coding/golang/k8s-as-backend/operator/server-test.csr")
+	// //openssl req -in ~/Coding/golang/k8s-as-backend/operator/server-test.csr -noout -text
+	// defer file.Close()
+	pem.Encode(os.Stdout, &pem.Block{Type: "CERTIFICATE REQUEST", Bytes: csrBytes}) //os.Stdout
 
 }
