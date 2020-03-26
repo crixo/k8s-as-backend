@@ -69,6 +69,14 @@ kubectl get k8sasbackends.k8s-as-backend.example.com  kab01 -o yaml
 - Verify main secondary resources has been successfully deployed
 ```
 kubectl get all
+kubectl get validatingwebhookconfigurations
+kubectl get crd
+```
+
+- Verify cluster-wide resources has been successfully deployed
+```
+kubectl get validatingwebhookconfigurations
+kubectl get crd
 ```
 
 - Open the browser and test the app
@@ -97,6 +105,11 @@ You can browse your CRDs definitions and CR instances through api server:
 - [operator CRs/instances](http://127.0.0.1:8001/apis/k8s-as-backend.example.com/v1alpha1/k8sasbackends) 
 - [operator CRs/instances by namespace](http://127.0.0.1:8001/apis/k8s-as-backend.example.com/v1alpha1/namespaces/default/k8sasbackends)
 - [operator CR/instance by namespace and name](http://127.0.0.1:8001/apis/k8s-as-backend.example.com/v1alpha1/namespaces/default/k8sasbackends/kab01)
+
+## Scale the solution through the operator CR
+```
+kubectl edit k8sasbackends.k8s-as-backend.example.com  kab01 -o yaml
+```
 
 - Clean up everything
 ```

@@ -92,6 +92,14 @@ func createDeployment(resNamespacedName types.NamespacedName, i *k8sasbackendv1a
 								Name:  "KUBECTL_PROXY_PORT",
 								Value: fmt.Sprint(kubectlApiPort),
 							},
+							{
+								Name: "NAMESPACE",
+								ValueFrom: &corev1.EnvVarSource{
+									FieldRef: &corev1.ObjectFieldSelector{
+										FieldPath: "metadata.namespace",
+									},
+								},
+							},
 						},
 					},
 						{

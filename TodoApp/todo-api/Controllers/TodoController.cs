@@ -28,19 +28,19 @@ namespace TodoApi.Controllers
         //     client.DefaultRequestHeaders.Add("User-Agent", ".NET Foundation Repository Reporter");
 
         private readonly ILogger<TodoController> _logger;
-
-        //https://docs.microsoft.com/it-it/aspnet/core/fundamentals/http-requests?view=aspnetcore-3.1
+        private readonly IConfiguration _config;
+    //https://docs.microsoft.com/it-it/aspnet/core/fundamentals/http-requests?view=aspnetcore-3.1
         private readonly IHttpClientFactory _clientFactory;
 
         public TodoController(ILogger<TodoController> logger, IWebHostEnvironment env, IConfiguration config, IHttpClientFactory clientFactory)
         {
             _logger = logger;
+            this._config = config;
             _logger.LogDebug(env.EnvironmentName);
             foreach(var kv in config.AsEnumerable()){
                 _logger.LogDebug("k:{0} - v:{1}", kv.Key, kv.Value);
             }
             _clientFactory = clientFactory;
-
         }
 
         [HttpGet("fakes")]
@@ -68,12 +68,14 @@ namespace TodoApi.Controllers
         [HttpPost()]
         public async Task<ActionResult<Todo>> CreateTodo(Todo dto)
         {
+            var ns = this._config["NAMESPACE"];
+
             var crd = new k8s.Models.Todo{
                 ApiVersion = "k8sasbackend.com/v1",
                 Kind = "Todo",
                 Metadata = new V1ObjectMeta{
                     Name = dto.Code,
-                    NamespaceProperty = "default",
+                    NamespaceProperty = ns,
                 },
                 Spec = new TodoSpec{
                     Message = dto.Message,
@@ -90,10 +92,13 @@ namespace TodoApi.Controllers
 
             using var stringContent = new StringContent(json, Encoding.UTF8, "application/json");
 
+            
             //TODO: make namespace as env variable
+            var url = string.Format("http://localhost:8080/apis/k8sasbackend.com/v1/namespaces/{0}/todos", ns);
+            _logger.LogDebug("posting todo resource to {0}", url);
             var request = new HttpRequestMessage(
                 HttpMethod.Post,
-                "http://localhost:8080/apis/k8sasbackend.com/v1/namespaces/default/todos");     
+                url);
             request.Headers.Add("Accept", "application/json");
             request.Headers.Add("User-Agent", "TodoApp");
             //AddBearerToken(request);
@@ -127,9 +132,10 @@ namespace TodoApi.Controllers
         public async Task<IEnumerable<Todo>> GetList()
         {
 
+            var ns = this._config["NAMESPACE"];
             var request = new HttpRequestMessage(
                 HttpMethod.Get,
-                "http://localhost:8080/apis/k8sasbackend.com/v1/namespaces/default/todos");
+                string.Format("http://localhost:8080/apis/k8sasbackend.com/v1/namespaces/{0}/todos", ns));
             request.Headers.Add("Accept", "application/json");
             request.Headers.Add("User-Agent", "TodoApp");
             //AddBearerToken(request);
