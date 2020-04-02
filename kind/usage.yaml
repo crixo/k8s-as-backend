@@ -64,4 +64,5 @@ spec:
         backend:
           serviceName: bar-service
           servicePort: 5678
+    #host: pippo.192.168.1.14.xip.io # see https://xip.io 
 ---

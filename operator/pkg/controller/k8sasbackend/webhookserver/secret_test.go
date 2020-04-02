@@ -82,11 +82,11 @@ func TestSecret(t *testing.T) {
 	keyFile := TempFileName("/Users/cristiano/Coding/golang/k8s-as-backend/operator/certs", "server-key", ".pem")
 	defer os.Remove(keyFile)
 	webhookServer := &WebhookServer{
-		CerFilePath: certFile,
-		KeyFilePath: keyFile,
-		Client:      cl,
-		Scheme:      s,
-		CertClient:  clCert,
+		// CerFilePath: certFile,
+		// KeyFilePath: keyFile,
+		Client:     cl,
+		Scheme:     s,
+		CertClient: clCert,
 	}
 
 	res, err := webhookServer.ensureSecret(i)

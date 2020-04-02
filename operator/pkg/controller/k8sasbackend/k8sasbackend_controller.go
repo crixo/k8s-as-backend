@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"path"
 
 	k8sasbackendv1alpha1 "github.com/crixo/k8s-as-backend/operator/pkg/apis/k8sasbackend/v1alpha1"
 	authz "github.com/crixo/k8s-as-backend/operator/pkg/controller/k8sasbackend/authz"
@@ -65,8 +64,8 @@ func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 	certCl, _ := certv1beta1.NewForConfig(mgr.GetConfig())
 	webhookServer = webhookserver.NewWebhookServer(reconciler.Client,
 		reconciler.Scheme,
-		path.Join(pemFolder, "server-cert.pem"),
-		path.Join(pemFolder, "server-key.pem"),
+		// path.Join(pemFolder, "server-cert.pem"),
+		// path.Join(pemFolder, "server-key.pem"),
 		certCl.CertificateSigningRequests(),
 	)
 

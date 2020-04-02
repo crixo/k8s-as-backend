@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path"
 
 	k8sasbackendv1alpha1 "github.com/crixo/k8s-as-backend/operator/pkg/apis/k8sasbackend/v1alpha1"
 	common "github.com/crixo/k8s-as-backend/operator/pkg/controller/k8sasbackend/common"
@@ -24,7 +25,8 @@ import (
 
 func (ws WebhookServer) ensureSecret(i *k8sasbackendv1alpha1.K8sAsBackend) (*reconcile.Result, error) {
 	sharedResourceName := common.CreateUniqueSecondaryResourceName(i, baseName)
-	requeue, err := ws.createCertIfNeeded(sharedResourceName, i.Namespace)
+	cerFilePath := getCertName(i)
+	requeue, err := ws.createCertIfNeeded(cerFilePath, sharedResourceName, i.Namespace)
 	if err != nil {
 		return &reconcile.Result{}, err
 	} else if requeue {
@@ -33,8 +35,8 @@ func (ws WebhookServer) ensureSecret(i *k8sasbackendv1alpha1.K8sAsBackend) (*rec
 	}
 
 	i.Status.AdmissionWebhookPems = []string{
-		ws.CerFilePath,
-		ws.KeyFilePath,
+		cerFilePath,
+		keyFilePath,
 	}
 	err = ws.Client.Status().Update(context.TODO(), i)
 	if err != nil {
@@ -57,8 +59,22 @@ func (ws WebhookServer) ensureSecret(i *k8sasbackendv1alpha1.K8sAsBackend) (*rec
 	return nil, err
 }
 
-func (ws WebhookServer) createCertIfNeeded(sharedResourceName, namespace string) (requeue bool, err error) {
-	if common.FileNotExists(ws.CerFilePath) {
+func getCertName(i *k8sasbackendv1alpha1.K8sAsBackend) string {
+	return path.Join(pemFolder, fmt.Sprintf("%s_%s_cert.pem", i.Name, i.Namespace))
+}
+
+func (ws WebhookServer) shouldCreatePems(cerFilePath string) bool {
+
+	if common.FileNotExists(cerFilePath) { //TODO: add cert vs cluster CA verification
+		return true
+	}
+
+	return false
+}
+
+func (ws WebhookServer) createCertIfNeeded(cerFilePath, sharedResourceName, namespace string) (requeue bool, err error) {
+
+	if ws.shouldCreatePems(cerFilePath) {
 
 		//found := &v1beta1.CertificateSigningRequest{}
 		//nsName := types.NamespacedName{Name: csrName, Namespace: ""}
@@ -88,7 +104,7 @@ func (ws WebhookServer) createCertIfNeeded(sharedResourceName, namespace string)
 			return true, err
 		}
 
-		err = ws.storeCertificateAsPem(found.Status.Certificate)
+		err = ws.storeCertificateAsPem(cerFilePath, found.Status.Certificate)
 		if err != nil {
 			return false, err
 		}
@@ -100,8 +116,9 @@ func (ws WebhookServer) createCertIfNeeded(sharedResourceName, namespace string)
 }
 
 func (ws WebhookServer) createSecret(nsName types.NamespacedName, i *k8sasbackendv1alpha1.K8sAsBackend) runtime.Object {
-	cert, _ := ioutil.ReadFile(ws.CerFilePath)
-	key, _ := ioutil.ReadFile(ws.KeyFilePath)
+	cerFilePath := getCertName(i)
+	cert, _ := ioutil.ReadFile(cerFilePath)
+	key, _ := ioutil.ReadFile(keyFilePath)
 	return common.CreateSecret(nsName, map[string][]byte{
 		"key.pem":  key,
 		"cert.pem": cert,
@@ -132,22 +149,31 @@ func (ws WebhookServer) approveCertificate(csrName string) error {
 	return err
 }
 
-func (ws WebhookServer) storeCertificateAsPem(cert []byte) error {
-	err := ioutil.WriteFile(ws.CerFilePath, cert, 0644)
+func (ws WebhookServer) storeCertificateAsPem(cerFilePath string, cert []byte) error {
+	err := ioutil.WriteFile(cerFilePath, cert, 0644)
 	if err != nil {
 		panic(err)
 	}
 	return err
 }
 
-func (ws WebhookServer) createKeyAndCertRequestAsPem(webhookServerServiceName, namespace string) (csrPem []byte) {
-
-	keyBytes, _ := rsa.GenerateKey(rand.Reader, 2048)
-	keyfile, _ := os.Create(ws.KeyFilePath)
+func createKeyAsPem() {
+	rsaKey, _ := rsa.GenerateKey(rand.Reader, 2048)
+	keyfile, _ := os.Create(keyFilePath)
 	defer keyfile.Close()
 	pem.Encode(keyfile, &pem.Block{
 		Type:  "RSA PRIVATE KEY",
-		Bytes: x509.MarshalPKCS1PrivateKey(keyBytes)})
+		Bytes: x509.MarshalPKCS1PrivateKey(rsaKey)})
+
+	return
+}
+
+func (ws WebhookServer) createKeyAndCertRequestAsPem(webhookServerServiceName, namespace string) (csrPem []byte) {
+
+	fileBytes, _ := ioutil.ReadFile(keyFilePath)
+	privPem, _ := pem.Decode(fileBytes)
+	parsedKey, _ := x509.ParsePKCS1PrivateKey(privPem.Bytes)
+	//keyBytes := parsedKey
 
 	subj := pkix.Name{
 		CommonName: fmt.Sprintf("%s.%s.svc", webhookServerServiceName, namespace),
@@ -172,7 +198,8 @@ func (ws WebhookServer) createKeyAndCertRequestAsPem(webhookServerServiceName, n
 		},
 	}
 
-	csr, _ := x509.CreateCertificateRequest(rand.Reader, &template, keyBytes)
+	//csr, _ := x509.CreateCertificateRequest(rand.Reader, &template, keyBytes)
+	csr, _ := x509.CreateCertificateRequest(rand.Reader, &template, parsedKey)
 	//csrFile, _ := os.Create("/Users/cristiano/Coding/golang/k8s-as-backend/operator/certs/server.csr")
 	//openssl req -in ~/Coding/golang/k8s-as-backend/operator/server-test.csr -noout -text
 	//defer csrFile.Close()
@@ -195,4 +222,32 @@ func (ws WebhookServer) createSigningRequest(csrName string, request []byte) err
 	//return ws.Client.Create(context.TODO(), res)
 	_, err := ws.CertClient.Create(res)
 	return err
+}
+
+func verifyCert(rootPEM, certPEM []byte, name string) error {
+	roots := x509.NewCertPool()
+	ok := roots.AppendCertsFromPEM(rootPEM)
+	if !ok {
+		return fmt.Errorf("failed to parse root certificate")
+	}
+
+	block, _ := pem.Decode(certPEM)
+	if block == nil {
+		return fmt.Errorf("failed to parse certificate PEM")
+	}
+	cert, err := x509.ParseCertificate(block.Bytes)
+	if err != nil {
+		return fmt.Errorf("failed to parse certificate: %v", err.Error())
+	}
+
+	opts := x509.VerifyOptions{
+		//DNSName: name,
+		Roots: roots,
+	}
+
+	if _, err := cert.Verify(opts); err != nil {
+		return fmt.Errorf("failed to verify certificate: %v", err.Error())
+	}
+
+	return nil
 }

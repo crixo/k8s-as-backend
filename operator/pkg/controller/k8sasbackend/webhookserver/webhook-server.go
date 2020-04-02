@@ -1,6 +1,9 @@
 package webhookserver
 
 import (
+	"os"
+	"path"
+
 	k8sasbackendv1alpha1 "github.com/crixo/k8s-as-backend/operator/pkg/apis/k8sasbackend/v1alpha1"
 	common "github.com/crixo/k8s-as-backend/operator/pkg/controller/k8sasbackend/common"
 	"github.com/go-logr/logr"
@@ -25,25 +28,31 @@ var (
 	port                       int         = 443
 	log                        logr.Logger = common.Log
 	//caBundle []byte      = common.AppState.ClientConfig.CAData
+	pemFolder = common.GetEnv("PEM_FOLDER", os.TempDir())
+
+	keyFilePath = path.Join(pemFolder, "server_key.pem")
 )
+
+func init() {
+	//log.Info("Creating pem key at " + keyFilePath)
+	createKeyAsPem()
+}
 
 // Users/cristiano/Coding/golang/k8s-as-backend/operator/certs/server-cert.pem
 // Users/cristiano/Coding/golang/k8s-as-backend/operator/certs/server-key.pem
 type WebhookServer struct {
-	Client      client.Client
-	Scheme      *runtime.Scheme
-	CerFilePath string
-	KeyFilePath string
-	CertClient  certv1beta1.CertificateSigningRequestInterface
+	Client     client.Client
+	Scheme     *runtime.Scheme
+	CertClient certv1beta1.CertificateSigningRequestInterface
 }
 
-func NewWebhookServer(cl client.Client, s *runtime.Scheme, cerFilePath, keyFilePath string, certCl certv1beta1.CertificateSigningRequestInterface) *WebhookServer {
+func NewWebhookServer(cl client.Client, s *runtime.Scheme, certCl certv1beta1.CertificateSigningRequestInterface) *WebhookServer {
 	return &WebhookServer{
-		CerFilePath: cerFilePath,
-		KeyFilePath: keyFilePath,
-		Client:      cl,
-		Scheme:      s,
-		CertClient:  certCl,
+		// CerFilePath: cerFilePath,
+		// KeyFilePath: keyFilePath,
+		Client:     cl,
+		Scheme:     s,
+		CertClient: certCl,
 	}
 }
 
@@ -56,6 +65,8 @@ func (ws WebhookServer) GetWatchedResources() []runtime.Object {
 }
 
 func (ws *WebhookServer) Reconcile(i *k8sasbackendv1alpha1.K8sAsBackend) (*reconcile.Result, error) {
+
+	log.Info("Created pem key at " + keyFilePath)
 
 	res, err := ws.ensureSecret(i)
 	if common.PrepareComponentResult(res, err) {

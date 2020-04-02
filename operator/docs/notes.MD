@@ -5,6 +5,22 @@
 openssl req -in ~/Coding/golang/k8s-as-backend/operator/server-test.csr -noout -text
 ```
 
+### Verifying that a Certificate is issued by a CA
+How to use OpenSSL on the command line to verify that a certificate was issued by a specific CA, given that CA's certificate
+```
+openssl verify -verbose -CAfile cacert.pem  server.crt
+```
+answer should be
+```
+server.crt: OK
+```
+If you get any other message, the certificate was not issued by that CA.
+
+```
+CA_BUNDLE=$(kubectl config view --raw -o json | jq -r '.clusters[] | select(.name == "'$(kubectl config current-context)'") | .cluster."certificate-authority-data"')
+echo $CA_BUNDLE | base64 -D >> cacert.pem
+```
+
 ## Extra settings via env variable
 ```
 export PEM_FOLDER="/Users/cristiano/Coding/golang/k8s-as-backend/operator/certs"

@@ -6,11 +6,24 @@ import (
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/pem"
+	"io/ioutil"
 	"os"
 	"testing"
 )
 
 //var oidEmailAddress = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 9, 1}
+
+func TestCertValidity(t *testing.T) {
+	rootPem, err := ioutil.ReadFile("../../../../cacert.pem")
+	if err != nil {
+		t.Error(err)
+	}
+	certPem, _ := ioutil.ReadFile("../../../../kab01-todos-webhook-server_cert.pem")
+	err = verifyCert(rootPem, certPem, "")
+	if err != nil {
+		t.Error(err)
+	}
+}
 
 func TestPemCreation(t *testing.T) {
 	keyBytes, _ := rsa.GenerateKey(rand.Reader, 2048)
