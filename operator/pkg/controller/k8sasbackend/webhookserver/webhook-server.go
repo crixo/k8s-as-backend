@@ -2,7 +2,6 @@ package webhookserver
 
 import (
 	"os"
-	"path"
 
 	k8sasbackendv1alpha1 "github.com/crixo/k8s-as-backend/operator/pkg/apis/k8sasbackend/v1alpha1"
 	common "github.com/crixo/k8s-as-backend/operator/pkg/controller/k8sasbackend/common"
@@ -29,14 +28,7 @@ var (
 	log                        logr.Logger = common.Log
 	//caBundle []byte      = common.AppState.ClientConfig.CAData
 	pemFolder = common.GetEnv("PEM_FOLDER", os.TempDir())
-
-	keyFilePath = path.Join(pemFolder, "server_key.pem")
 )
-
-func init() {
-	//log.Info("Creating pem key at " + keyFilePath)
-	createKeyAsPem()
-}
 
 // Users/cristiano/Coding/golang/k8s-as-backend/operator/certs/server-cert.pem
 // Users/cristiano/Coding/golang/k8s-as-backend/operator/certs/server-key.pem
@@ -65,8 +57,6 @@ func (ws WebhookServer) GetWatchedResources() []runtime.Object {
 }
 
 func (ws *WebhookServer) Reconcile(i *k8sasbackendv1alpha1.K8sAsBackend) (*reconcile.Result, error) {
-
-	log.Info("Created pem key at " + keyFilePath)
 
 	res, err := ws.ensureSecret(i)
 	if common.PrepareComponentResult(res, err) {

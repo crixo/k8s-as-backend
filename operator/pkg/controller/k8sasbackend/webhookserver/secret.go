@@ -25,8 +25,9 @@ import (
 
 func (ws WebhookServer) ensureSecret(i *k8sasbackendv1alpha1.K8sAsBackend) (*reconcile.Result, error) {
 	sharedResourceName := common.CreateUniqueSecondaryResourceName(i, baseName)
-	cerFilePath := getCertName(i)
-	requeue, err := ws.createCertIfNeeded(cerFilePath, sharedResourceName, i.Namespace)
+	cerFilePath := getPemName(i, "cert")
+	keyFilePath := getPemName(i, "key")
+	requeue, err := ws.createCertIfNeeded(cerFilePath, keyFilePath, sharedResourceName, i.Namespace)
 	if err != nil {
 		return &reconcile.Result{}, err
 	} else if requeue {
@@ -59,8 +60,8 @@ func (ws WebhookServer) ensureSecret(i *k8sasbackendv1alpha1.K8sAsBackend) (*rec
 	return nil, err
 }
 
-func getCertName(i *k8sasbackendv1alpha1.K8sAsBackend) string {
-	return path.Join(pemFolder, fmt.Sprintf("%s_%s_cert.pem", i.Name, i.Namespace))
+func getPemName(i *k8sasbackendv1alpha1.K8sAsBackend, pemKind string) string {
+	return path.Join(pemFolder, fmt.Sprintf("%s_%s_%s.pem", i.Name, i.Namespace, pemKind))
 }
 
 func (ws WebhookServer) shouldCreatePems(cerFilePath string) bool {
@@ -72,9 +73,13 @@ func (ws WebhookServer) shouldCreatePems(cerFilePath string) bool {
 	return false
 }
 
-func (ws WebhookServer) createCertIfNeeded(cerFilePath, sharedResourceName, namespace string) (requeue bool, err error) {
+func (ws WebhookServer) createCertIfNeeded(cerFilePath, keyFilePath, sharedResourceName, namespace string) (requeue bool, err error) {
 
 	if ws.shouldCreatePems(cerFilePath) {
+
+		if common.FileNotExists(keyFilePath) {
+			createKeyAsPem(keyFilePath)
+		}
 
 		//found := &v1beta1.CertificateSigningRequest{}
 		//nsName := types.NamespacedName{Name: csrName, Namespace: ""}
@@ -82,7 +87,7 @@ func (ws WebhookServer) createCertIfNeeded(cerFilePath, sharedResourceName, name
 
 		found, err := ws.CertClient.Get(sharedResourceName, metav1.GetOptions{})
 		if err != nil && errors.IsNotFound(err) {
-			certRequest := ws.createKeyAndCertRequestAsPem(sharedResourceName, namespace)
+			certRequest := ws.createKeyAndCertRequestAsPem(keyFilePath, sharedResourceName, namespace)
 			err := ws.createSigningRequest(sharedResourceName, certRequest)
 			if err != nil {
 				panic(err)
@@ -116,7 +121,8 @@ func (ws WebhookServer) createCertIfNeeded(cerFilePath, sharedResourceName, name
 }
 
 func (ws WebhookServer) createSecret(nsName types.NamespacedName, i *k8sasbackendv1alpha1.K8sAsBackend) runtime.Object {
-	cerFilePath := getCertName(i)
+	cerFilePath := getPemName(i, "cert")
+	keyFilePath := getPemName(i, "key")
 	cert, _ := ioutil.ReadFile(cerFilePath)
 	key, _ := ioutil.ReadFile(keyFilePath)
 	return common.CreateSecret(nsName, map[string][]byte{
@@ -157,7 +163,7 @@ func (ws WebhookServer) storeCertificateAsPem(cerFilePath string, cert []byte) e
 	return err
 }
 
-func createKeyAsPem() {
+func createKeyAsPem(keyFilePath string) {
 	rsaKey, _ := rsa.GenerateKey(rand.Reader, 2048)
 	keyfile, _ := os.Create(keyFilePath)
 	defer keyfile.Close()
@@ -168,7 +174,7 @@ func createKeyAsPem() {
 	return
 }
 
-func (ws WebhookServer) createKeyAndCertRequestAsPem(webhookServerServiceName, namespace string) (csrPem []byte) {
+func (ws WebhookServer) createKeyAndCertRequestAsPem(keyFilePath, webhookServerServiceName, namespace string) (csrPem []byte) {
 
 	fileBytes, _ := ioutil.ReadFile(keyFilePath)
 	privPem, _ := pem.Decode(fileBytes)
