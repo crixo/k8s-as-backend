@@ -12,6 +12,7 @@ import (
 
 	todov1 "github.com/crixo/k8s-as-backend/library/pkg/apis/k8sasbackend/v1"
 	clientset "github.com/crixo/k8s-as-backend/library/pkg/client/clientset/versioned"
+	"github.com/crixo/k8s-as-backend/library/pkg/client/clientset/versioned/scheme"
 	todoInformers "github.com/crixo/k8s-as-backend/library/pkg/client/informers/externalversions"
 
 	//"github.com/golang/glog"
@@ -27,7 +28,8 @@ import (
 	"k8s.io/client-go/tools/record"
 	"k8s.io/client-go/tools/reference"
 	"k8s.io/client-go/util/workqueue"
-	"k8s.io/kubernetes/pkg/proxy/apis/config/scheme"
+	//"k8s.io/kubernetes/pkg/proxy/apis/config/scheme"
+	//"k8s.io/client-go/kubernetes/scheme"
 )
 
 var (

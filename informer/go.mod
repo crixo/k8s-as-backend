@@ -4,11 +4,20 @@ go 1.13
 
 require (
 	github.com/crixo/k8s-as-backend/library v0.0.0
+
 	go.uber.org/zap v1.13.0
 	k8s.io/api v0.0.0
 	k8s.io/apimachinery v0.17.2
 	k8s.io/client-go v0.0.0
-	k8s.io/kubernetes v1.17.3
+
+// github.com/json-iterator/go v1.1.8 // indirect
+// github.com/onsi/ginkgo v1.10.1 // indirect
+// github.com/onsi/gomega v1.7.0 // indirect
+// golang.org/x/crypto v0.0.0-20190820162420-60c769a6c586 // indirect
+// golang.org/x/sys v0.0.0-20190826190057-c7b8b68b1456 // indirect
+// golang.org/x/time v0.0.0-20190308202827-9d24e82272b4 // indirect
+// k8s.io/kube-openapi v0.0.0-20191107075043-30be4d16710a // indirect
+// k8s.io/utils v0.0.0-20191114184206-e782cd3c129f // indirect
 )
 
 replace (
