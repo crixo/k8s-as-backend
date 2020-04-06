@@ -133,7 +133,6 @@ github.com/coreos/prometheus-operator v0.34.0 h1:TF9qaydNeUamLKs0hniaapa4FBz8U8T
 github.com/coreos/prometheus-operator v0.34.0/go.mod h1:Li6rMllG/hYIyXfMuvUwhyC+hqwJVHdsDdP21hypT1M=
 github.com/coreos/rkt v1.30.0/go.mod h1:O634mlH6U7qk87poQifK6M2rsFNt+FyUTWNMnP1hF1U=
 github.com/cpuguy83/go-md2man v1.0.10/go.mod h1:SmD6nW6nTyfqj6ABTjUi3V3JVMnlJmwcJI5acqYI6dE=
-github.com/crixo/k8s-as-backend v0.0.1 h1:38duo9E8HjJdnXvolH0sMim4Swn8gB2YyEYvIfdZtmY=
 github.com/cyphar/filepath-securejoin v0.2.2/go.mod h1:FpkQEhXnPnOthhzymB7CGsFk2G9VLXONKD9G7QGMM+4=
 github.com/cznic/b v0.0.0-20180115125044-35e9bbe41f07/go.mod h1:URriBxXwVq5ijiJ12C7iIZqlA69nTlI+LgI6/pwftG8=
 github.com/cznic/fileutil v0.0.0-20180108211300-6a051e75936f/go.mod h1:8S58EK26zhXSxzv7NQFpnliaOQsmDUxvoQO3rt154Vg=
@@ -526,13 +525,8 @@ github.com/operator-framework/operator-lifecycle-manager v0.0.0-20191115003340-1
 github.com/operator-framework/operator-registry v1.5.1/go.mod h1:agrQlkWOo1q8U1SAaLSS2WQ+Z9vswNT2M2HFib9iuLY=
 github.com/operator-framework/operator-registry v1.5.3/go.mod h1:agrQlkWOo1q8U1SAaLSS2WQ+Z9vswNT2M2HFib9iuLY=
 github.com/operator-framework/operator-registry v1.5.7-0.20200121213444-d8e2ec52c19a/go.mod h1:ekexcV4O8YMxdQuPb+Xco7MHfVmRIq7Jvj5e6NU7dHI=
-github.com/operator-framework/operator-sdk v0.15.2 h1:VlxI0J+HLmMKs5k53drQ/B1AXhyNj0OaD2BbREt8Hnk=
-github.com/operator-framework/operator-sdk v0.15.2/go.mod h1:RkC5LpluVONa08ORFIIVCYrEr855xG1/NltRL2jQ8qo=
 github.com/operator-framework/operator-sdk v0.16.0 h1:+D61x7FjcITLzjVakzfzz5hqkkMDR+uEDMzXfyVZOw8=
 github.com/operator-framework/operator-sdk v0.16.0/go.mod h1:1UykIjxOHX/Ltj/2Z0h0y0DZ7YGBYlcBI+ctaCjXVDk=
-github.com/operator-framework/operator-sdk-samples v0.16.0 h1:oZ6IkjYZbpf7GKmaf2kd/tr5fQQprWBUgpy8MtWP+bc=
-github.com/operator-framework/operator-sdk-samples/go/memcached-operator v0.0.0-20200324154807-a7311f16026a h1:nyUpb/uXqQZJ6HqEb0w2QbIjYj5D0L2nv11WAGdW4TM=
-github.com/operator-framework/operator-sdk-samples/go/memcached-operator v0.0.0-20200324154807-a7311f16026a/go.mod h1:BgyHq2sdpIHAKGYWebl7fIwFBrZ5X2qZpHV0OVwkjYU=
 github.com/otiai10/copy v1.0.1/go.mod h1:8bMCJrAqOtN/d9oyh5HR7HhLQMvcGMpGdwRDYsfOCHc=
 github.com/otiai10/curr v0.0.0-20150429015615-9b4961190c95/go.mod h1:9qAhocn7zKJG+0mI8eUu6xqkFDYS2kb2saOteoSB3cE=
 github.com/otiai10/curr v0.0.0-20190513014714-f5a3d24e5776/go.mod h1:3HNVkVOU7vZeFXocWuvtcS0XSFLcf2XUSDHkq9t1jU4=
@@ -939,7 +933,6 @@ k8s.io/kubelet v0.0.0-20191016114556-7841ed97f1b2/go.mod h1:SBvrtLbuePbJygVXGGCM
 k8s.io/kubernetes v1.16.0/go.mod h1:nlP2zevWKRGKuaaVbKIwozU0Rjg9leVDXkL4YTtjmVs=
 k8s.io/kubernetes v1.16.2 h1:k0f/OVp6Yfv+UMTm6VYKhqjRgcvHh4QhN9coanjrito=
 k8s.io/kubernetes v1.16.2/go.mod h1:SmhGgKfQ30imqjFVj8AI+iW+zSyFsswNErKYeTfgoH0=
-k8s.io/kubernetes v1.17.4 h1:hnz5goC7sf4LyG9kjJv6eBBJ/8DeD6TL3UAdCoHpaJE=
 k8s.io/legacy-cloud-providers v0.0.0-20191016115753-cf0698c3a16b/go.mod h1:tKW3pKqdRW8pMveUTpF5pJuCjQxg6a25iLo+Z9BXVH0=
 k8s.io/metrics v0.0.0-20191016113814-3b1a734dba6e/go.mod h1:ve7/vMWeY5lEBkZf6Bt5TTbGS3b8wAxwGbdXAsufjRs=
 k8s.io/repo-infra v0.0.0-20181204233714-00fe14e3d1a3/go.mod h1:+G1xBfZDfVFsm1Tj/HNCvg4QqWx8rJ2Fxpqr1rqp/gQ=
