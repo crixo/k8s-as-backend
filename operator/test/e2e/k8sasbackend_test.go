@@ -19,6 +19,7 @@ var (
 	timeout              = time.Second * 60
 	cleanupRetryInterval = time.Second * 1
 	cleanupTimeout       = time.Second * 5
+	//skipCleanUp          = os.Getenv("SKIP_CLEAN_UP")
 )
 
 func TestK8sAsBackend(t *testing.T) {
@@ -80,7 +81,9 @@ func k8sasbackendTest(t *testing.T, f *framework.Framework, ctx *framework.TestC
 func MemcachedCluster(t *testing.T) {
 	t.Parallel()
 	ctx := framework.NewTestCtx(t)
-	defer ctx.Cleanup()
+	if !*args.skipCleanUp {
+		defer ctx.Cleanup()
+	}
 
 	// t.Log("Initializing cluster resources")
 	// err := ctx.InitializeClusterResources(&framework.CleanupOptions{TestContext: ctx, Timeout: cleanupTimeout, RetryInterval: cleanupRetryInterval})
