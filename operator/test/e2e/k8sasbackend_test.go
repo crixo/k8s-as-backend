@@ -82,6 +82,7 @@ func MemcachedCluster(t *testing.T) {
 	t.Parallel()
 	ctx := framework.NewTestCtx(t)
 	if !*args.skipCleanUp {
+		t.Log("defer cleanup")
 		defer ctx.Cleanup()
 	}
 
