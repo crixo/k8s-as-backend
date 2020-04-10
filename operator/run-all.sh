@@ -14,7 +14,7 @@ TODO_LIST_URL="http://localhost/$NS/$CR/todo-app/api/Todo"
 if [[ ${BUILD_CLUSTER} == 'y' ]]; then
 cd ../kind
 sh create-cluster.sh
-sh sh preload-image.sh
+sh preload-image.sh
 
 cd ../operator
 fi
