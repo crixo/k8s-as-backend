@@ -22,7 +22,6 @@ import (
 	"os"
 
 	"github.com/crixo/k8s-as-backend/webhook-server/restclient"
-	"go.uber.org/zap"
 	v1 "k8s.io/api/admission/v1"
 	"k8s.io/klog"
 )
@@ -43,17 +42,18 @@ func admitCRD(ar v1.AdmissionReview) *v1.AdmissionResponse {
 	reviewResponse.Allowed = false
 
 	raw := ar.Request.Object.Raw
-	klog.V(2).Info(raw)
+	klog.V(2).Info("raw request received")
+	klog.V(3).Info(fmt.Sprintf("raw request: %s", raw))
 
 	rawJson := string(raw)
-	logger.With(zap.String("raw", rawJson)).Info("ar.Request.Object.Raw")
+	//logger.With(zap.String("raw", rawJson)).Info("ar.Request.Object.Raw")
 
 	envKey := "TODO_APP_SVC"
 	host := ""
 	if value, exists := os.LookupEnv(envKey); exists {
 		host = value
 	} else {
-		panic(fmt.Sprintf("The %s env variable is mandatory"))
+		panic(fmt.Sprintf("The %s env variable is mandatory", envKey))
 	}
 	//host := "http://todo-app-svc:5000"
 	message := map[string]interface{}{
@@ -67,8 +67,9 @@ func admitCRD(ar v1.AdmissionReview) *v1.AdmissionResponse {
 
 	headers := make(map[string][]string)
 	headers["content-type"] = append(headers["content-type"], "application/json")
-	// resp, err := http.Post(host+"/api/todo/validate", "application/json", bytes.NewBuffer(bytesRepresentation))
-	resp, err := restclient.Post(host+"/api/todo/validate", message, headers)
+	bizComponentEndpoint := host + "/api/todo/validate"
+	klog.V(2).Info(fmt.Sprintf("Forwarding raw request to %s", bizComponentEndpoint))
+	resp, err := restclient.Post(bizComponentEndpoint, message, headers)
 	if err != nil {
 		logger.Error(err.Error())
 	}
@@ -77,10 +78,13 @@ func admitCRD(ar v1.AdmissionReview) *v1.AdmissionResponse {
 
 	json.NewDecoder(resp.Body).Decode(&result)
 
-	logger.With(zap.Any("raw", result)).Info("raw response")
+	//logger.With(zap.Any("raw", result)).Info("raw response")
+
+	klog.V(3).Info(fmt.Sprintf("raw response: %s", result))
 
 	if v, ok := result["valid"].(bool); ok {
 		reviewResponse.Allowed = v
+		klog.V(2).Info("biz component validated the request")
 	}
 
 	return &reviewResponse

@@ -121,5 +121,11 @@ kubectl delete -f deploy/crds/kab01.yaml
 ```
 At the present cluster-wide resource are not removed if no longer needed
 
+## Full demo using e2e testing framework
+use the following script to create the cluster and/or deploy the workload using the operator
+```
+sh run-all.sh
+```
+
 ## Notes
 The images on docker hub may not be up to date. Use the specific folder at root level to build the latest version of the images.

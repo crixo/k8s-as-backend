@@ -122,7 +122,7 @@ func serve(w http.ResponseWriter, r *http.Request, admit admitHandler) {
 		return
 	}
 
-	klog.V(2).Info(fmt.Sprintf("handling request: %s", body))
+	klog.V(3).Info(fmt.Sprintf("handling request: %s", body))
 
 	deserializer := codecs.UniversalDeserializer()
 	obj, gvk, err := deserializer.Decode(body, nil, nil)
@@ -141,6 +141,7 @@ func serve(w http.ResponseWriter, r *http.Request, admit admitHandler) {
 			klog.Errorf("Expected v1beta1.AdmissionReview but got: %T", obj)
 			return
 		}
+		klog.V(2).Info(fmt.Sprintf("handling request for %s/%s", requestedAdmissionReview.Request.Namespace, requestedAdmissionReview.Request.Name))
 		responseAdmissionReview := &v1beta1.AdmissionReview{}
 		responseAdmissionReview.SetGroupVersionKind(*gvk)
 		responseAdmissionReview.Response = admit.v1beta1(*requestedAdmissionReview)
@@ -152,6 +153,8 @@ func serve(w http.ResponseWriter, r *http.Request, admit admitHandler) {
 			klog.Errorf("Expected v1.AdmissionReview but got: %T", obj)
 			return
 		}
+
+		klog.V(2).Info(fmt.Sprintf("handling request for %s/%s", requestedAdmissionReview.Request.Namespace, requestedAdmissionReview.Request.Name))
 		responseAdmissionReview := &v1.AdmissionReview{}
 		responseAdmissionReview.SetGroupVersionKind(*gvk)
 		responseAdmissionReview.Response = admit.v1(*requestedAdmissionReview)
@@ -164,7 +167,8 @@ func serve(w http.ResponseWriter, r *http.Request, admit admitHandler) {
 		return
 	}
 
-	klog.V(2).Info(fmt.Sprintf("sending response: %v", responseObj))
+	klog.V(2).Info(fmt.Sprintf("sending response for kind %s", responseObj.GetObjectKind().GroupVersionKind().Kind))
+	klog.V(3).Info(fmt.Sprintf("sending response: %v", responseObj))
 	respBytes, err := json.Marshal(responseObj)
 	if err != nil {
 		klog.Error(err)
