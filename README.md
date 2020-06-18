@@ -21,9 +21,6 @@ Sync one-time execution vs async loop reconciliation.
 
 Business logic applied by the k8s controller should be delegated to a queue and executed form there. K8s provides its own [queueing mechanism](https://godoc.org/k8s.io/client-go/util/workqueue).
 
-## Collaboration
-My current skills on *golang* are very limited. Any contribution to speed up the implementation, suggestions aimed to improve the quality of the code and the repo organization are more then welcome.
-
 I'm currently grabbing existing code samples from [multiple sources](notes.md) to quickly match the goal described above so prove the technical feasibility.
 
 ## Kubernetes Operator
@@ -31,3 +28,25 @@ I'm also working on a [k8s operator](operator/README.md) to deploy and monitor t
 
 Project resources dependencies vs operator scope
 ![](images/kab-resource-deps.png?raw=true)
+
+## Reference
+
+### CRD & Informer
+- [Extending Kubernetes](https://get.oreilly.com/ind_extending-kubernetes.html)
+- [gianarb/todo-crd](https://github.com/gianarb/todo-crd)
+- [Code Generator](https://github.com/kubernetes/code-generator)
+
+### Admission Controller
+
+- [Dynamic Admission Control](https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers)
+- [Admission Webhook server sample](https://github.com/kubernetes/kubernetes/tree/v1.16.11/test/images/agnhost#webhook-kubernetes-external-admission-webhook)
+- [Banzai Tutorial](https://banzaicloud.com/blog/k8s-admission-webhooks/)
+
+### Operator
+
+- [Operator Pattern](https://kubernetes.io/docs/concepts/extend-kubernetes/operator/)
+- [Operator-SDK](https://github.com/operator-framework/operator-sdk)
+- [Kubernetes Operators](https://learning.oreilly.com/library/view/kubernetes-operators/9781492048039/)
+
+## Collaboration
+My current skills on *golang* are very limited. Any contribution to speed up the implementation, suggestions aimed to improve the quality of the code and the repo organization are more then welcome.
