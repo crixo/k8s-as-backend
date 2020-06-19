@@ -24,6 +24,7 @@ Business logic applied by the k8s controller should be delegated to a queue and 
 I'm currently grabbing existing code samples from [multiple sources](notes.md) to quickly match the goal described above so prove the technical feasibility.
 
 ## Manual deploy
+with plain yaml
 ```
 cd kind
 
@@ -31,10 +32,17 @@ cd kind
 sh create-cluster.sh
 
 # deploy workloads
+# TODO: verify the 'y' paramter due to docker build context path within nested scripts
 sh deploy.sh k8s-as-backend y
-
-
 ```
+
+with the operator using the e2e test framework with not clean-ip
+```
+cd operator
+
+sh run-all.sh
+```
+
 
 ## Kubernetes Operator
 I'm also working on a [k8s operator](operator/README.md) to deploy and monitor the described solution.
