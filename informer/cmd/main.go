@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/crixo/k8s-as-backend/informer/pkg/restclient"
 	todov1 "github.com/crixo/k8s-as-backend/library/pkg/apis/k8sasbackend/v1"
 	clientset "github.com/crixo/k8s-as-backend/library/pkg/client/clientset/versioned"
 	"github.com/crixo/k8s-as-backend/library/pkg/client/clientset/versioned/scheme"
@@ -170,6 +171,35 @@ func businessLogicAsync(key string, action string, todoClient *clientset.Clients
 	}
 	recorder.Event(ref, v1.EventTypeNormal, "Todo CRD changed", fmt.Sprintf("Todo CRD %s has been %s", todo.Name, action))
 
+	envKey := "TODO_APP_SVC"
+	host := ""
+	if value, exists := os.LookupEnv(envKey); exists {
+		host = value
+	} else {
+		panic(fmt.Sprintf("The %s env variable is mandatory", envKey))
+	}
+	headers := make(map[string][]string)
+	headers["content-type"] = append(headers["content-type"], "application/json")
+	bizComponentEndpoint := host + "/api/todonotifications"
+	message := map[string]interface{}{
+		"todoId":   todo.ObjectMeta.UID,
+		"issuedAt": todo.ObjectMeta.CreationTimestamp,
+	}
+	logger.
+		With(
+			zap.String("ep", bizComponentEndpoint)).
+		Info("sending notification")
+	resp, err := restclient.Post(bizComponentEndpoint, message, headers)
+	if err != nil {
+		logger.Error(err.Error())
+	}
+	logger.
+		With(
+			zap.String("response status", resp.Status)).
+		Info("notification sent")
+
+	// var response map[string]interface{}
+	// json.NewDecoder(resp.Body).Decode(&response)
 }
 
 // handleErr checks if an error happened and makes sure we will retry later.

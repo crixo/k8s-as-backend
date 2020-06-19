@@ -25,5 +25,11 @@ namespace TodoApi
         public string Message { get; set; }
     }       
 
+    public class TodoNotification
+    {
+        public Guid TodoId { get; set; }
+
+        public DateTime IssuedAt { get; set; }
+    }
 
 }

@@ -24,6 +24,9 @@ spec:
           - -tls-cert-file=/etc/webhook/certs/cert.pem
           - -tls-private-key-file=/etc/webhook/certs/key.pem
           - -v=2
+        env:
+          - name: TODO_APP_SVC
+            value: http://todo-app-svc:5000
         volumeMounts:
           - name: webhook-certs
             mountPath: /etc/webhook/certs

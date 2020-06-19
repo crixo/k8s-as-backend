@@ -20,10 +20,10 @@ SCRIPT_PATH=$(dirname $0)
 
 if [ $BUILD = 'y' ]; then 
     go mod vendor
-    docker build -t crixo/k8s-as-backend-webhook-server:v.0.0.0 .
+    docker build -t crixo/k8s-as-backend-webhook-server:v0.0.0 .
 fi
 
-kind load docker-image crixo/k8s-as-backend-webhook-server:v.0.0.0 --name $KIND_CLUSTER_NAME --nodes="k8s-as-backend-worker,k8s-as-backend-worker2"
+kind load docker-image crixo/k8s-as-backend-webhook-server:v0.0.0 --name $KIND_CLUSTER_NAME --nodes="k8s-as-backend-worker,k8s-as-backend-worker2"
 
 sh "$SCRIPT_PATH/artifacts/webhook-created-signed-cert.sh"
 #sh ./artifacts/webhook-patch-ca-bundle.sh

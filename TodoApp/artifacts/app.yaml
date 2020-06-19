@@ -19,7 +19,7 @@ spec:
     spec:
       serviceAccountName: todo-crd
       containers:
-      - image: crixo/todo-app:v0.0.0
+      - image: crixo/k8s-as-backend-todo-app:v0.0.0
         name: todo-app
         resources: {}
         env:
@@ -31,6 +31,8 @@ spec:
           value: "todo-app"
         - name: UseSwagger
           value: "1"
+        - name: NAMESPACE
+          value: "default"
       - image: bitnami/kubectl:1.16
         name: kubectl
         command:

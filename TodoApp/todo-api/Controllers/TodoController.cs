@@ -9,6 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using k8s.Models;
 using System.Text;
+using System.Collections.Concurrent;
 
 namespace TodoApi.Controllers
 {
@@ -31,6 +32,9 @@ namespace TodoApi.Controllers
         private readonly IConfiguration _config;
     //https://docs.microsoft.com/it-it/aspnet/core/fundamentals/http-requests?view=aspnetcore-3.1
         private readonly IHttpClientFactory _clientFactory;
+
+        private static ConcurrentDictionary<Guid, TodoNotification> TodoNotifications = 
+            new ConcurrentDictionary<Guid, TodoNotification>();
 
         public TodoController(ILogger<TodoController> logger, IWebHostEnvironment env, IConfiguration config, IHttpClientFactory clientFactory)
         {
@@ -165,22 +169,9 @@ namespace TodoApi.Controllers
             else
             {
                 todos = Array.Empty<Todo>();
-            }            
-
-
-
-            //var msg = await stringTask;
-            
+            }
 
             return todos;
-            // var rng = new Random();
-            // return Enumerable.Range(1, 5).Select(index => new Todo
-            // {
-            //     When = DateTime.Now.AddDays(index),
-            //     Code = Summaries[index],
-            //     Message = string.Format("message number {0}", rng.Next(Summaries.Length))
-            // })
-            // .ToArray();
         }       
 
         private void AddBearerToken(HttpRequestMessage request)

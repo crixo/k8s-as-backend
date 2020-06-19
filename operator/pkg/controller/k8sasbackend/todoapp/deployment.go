@@ -114,6 +114,10 @@ func createDeployment(resNamespacedName types.NamespacedName, i *k8sasbackendv1a
 									Value: "/root",
 								},
 								{
+									Name:  "TODO_APP_SVC",
+									Value: fmt.Sprintf("http://localhost:%d", todoPort),
+								},
+								{
 									Name: "NAMESPACE",
 									ValueFrom: &corev1.EnvVarSource{
 										FieldRef: &corev1.ObjectFieldSelector{
