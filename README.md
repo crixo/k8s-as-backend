@@ -32,7 +32,7 @@ cd kind
 sh create-cluster.sh
 
 # deploy workloads
-# TODO: verify the 'y' paramter due to docker build context path within nested scripts
+# TODO: verify the 'y' parameter due to docker build context path within nested scripts
 sh deploy.sh k8s-as-backend y
 ```
 
