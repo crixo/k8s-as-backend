@@ -100,6 +100,14 @@ func createDeployment(resNamespacedName types.NamespacedName, i *k8sasbackendv1a
 									},
 								},
 							},
+							{
+								Name: "POD_NAME",
+								ValueFrom: &corev1.EnvVarSource{
+									FieldRef: &corev1.ObjectFieldSelector{
+										FieldPath: "metadata.name",
+									},
+								},
+							},
 						},
 					},
 						{

@@ -31,9 +31,13 @@ sh ../webhook-server/deploy.sh $CLUSTER_NAME $BUILD
 kubectl get todos
 
 STATUS_CODE=""
+BASE_URL="http://localhost/todo-app"
+URL="$BASE_URL/api/todo"
+echo "url: $URL"
+echo "swagger ui: $BASE_URL/swagger-ui/index.html"
 while [ "$STATUS_CODE" != "200" ]
 do
-    STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost/todo-app/api/todo)
+    STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" $URL)
     echo "$STATUS_CODE"
     sleep 10
 done

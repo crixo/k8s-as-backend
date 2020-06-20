@@ -75,5 +75,10 @@ Project resources dependencies vs operator scope
 - [Operator-SDK](https://github.com/operator-framework/operator-sdk)
 - [Kubernetes Operators](https://learning.oreilly.com/library/view/kubernetes-operators/9781492048039/)
 
+### go.mod & kubernetes go-client
+
+- [Pinning k8s subcomponents with go mod](https://medium.com/@cristiano.deg/pinning-k8s-subcomponents-with-go-mod-1ad087731f83)
+- [Kubernetes Bar appointment](https://www.youtube.com/watch?v=vD47LRy23Ag)
+
 ## Collaboration
 My current skills on *golang* are very limited. Any contribution to speed up the implementation, suggestions aimed to improve the quality of the code and the repo organization are more then welcome.

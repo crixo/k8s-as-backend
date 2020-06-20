@@ -18,13 +18,15 @@ namespace TodoApi.Controllers
     public class TodoNotificationsController : ControllerBase
     {
         private readonly ILogger<TodoController> _logger;
+        private readonly IConfiguration _config;
 
         private static ConcurrentDictionary<Guid, TodoNotification> TodoNotifications = 
             new ConcurrentDictionary<Guid, TodoNotification>();
 
-        public TodoNotificationsController(ILogger<TodoController> logger)
+        public TodoNotificationsController(ILogger<TodoController> logger, IConfiguration config)
         {
-            _logger = logger;
+            this._logger = logger;
+            this._config = config;
         }   
 
         [HttpPost()]
@@ -35,8 +37,19 @@ namespace TodoApi.Controllers
         }
 
         [HttpGet()]
-        public async Task<IEnumerable<TodoNotification>> GetTodoNotifications(){
-            return TodoNotifications.Values;
+        public async Task<TodoNotificationResponse> GetTodoNotifications(){
+            return new TodoNotificationResponse{
+                Notifications = TodoNotifications.Values,
+                Meta = new Dictionary<string, string>(){
+                    {"podName", this._config.GetValue<string>("POD_NAME")}
+                }
+            };
         }  
+    }
+
+    public class TodoNotificationResponse
+    {
+        public IEnumerable<TodoNotification> Notifications {get; set;}
+        public Dictionary<string,string> Meta{get;set;}
     }
 }
