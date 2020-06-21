@@ -32,7 +32,6 @@ cd kind
 sh create-cluster.sh
 
 # deploy workloads
-# TODO: verify the 'y' parameter due to docker build context path within nested scripts
 sh deploy.sh k8s-as-backend y
 ```
 
@@ -41,6 +40,13 @@ with the operator using the e2e test framework with not clean-ip
 cd operator
 
 sh run-all.sh
+```
+
+with a running operator
+```
+cd operator
+
+sh deploy-with-running-operator.sh
 ```
 
 

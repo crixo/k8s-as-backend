@@ -4,13 +4,12 @@ go 1.13
 
 require (
 	github.com/crixo/k8s-as-backend/library v0.0.0
-	github.com/crixo/k8s-as-backend/webhook-server v0.0.0-20200410160756-90286c8ed7f7
+	github.com/crixo/k8s-as-backend/webhook-server v0.0.0-20200410160756-90286c8ed7f7 // indirect
 
 	go.uber.org/zap v1.13.0
 	k8s.io/api v0.0.0
 	k8s.io/apimachinery v0.17.2
 	k8s.io/client-go v0.0.0
-	k8s.io/klog v1.0.0
 
 // github.com/json-iterator/go v1.1.8 // indirect
 // github.com/onsi/ginkgo v1.10.1 // indirect

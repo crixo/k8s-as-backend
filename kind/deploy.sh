@@ -18,16 +18,32 @@ else
     BUILD=$2
 fi
 
+# use default ns due to hardcoded ns in webhook-server/artifacts/webhook-created-signed-cert.sh
+# NS=myns
+# kubectl create ns $NS
+# kubectl config set-context --current --namespace=$NS
+
+
 #informer
-sh ../informer/deploy.sh $CLUSTER_NAME $BUILD
+echo "deploying informer"
+cd ../informer
+sh deploy.sh $CLUSTER_NAME $BUILD
+cd ../kind
 
 #TodoApp
-sh ../TodoApp/deploy.sh $CLUSTER_NAME $BUILD
+echo "deploying TodoApp"
+cd ../TodoApp
+sh deploy.sh $CLUSTER_NAME $BUILD
+cd ../kind
 
 #webhook-server
-sh ../webhook-server/deploy.sh $CLUSTER_NAME $BUILD
+echo "deploying webhook"
+cd ../webhook-server
+sh deploy.sh $CLUSTER_NAME $BUILD
+cd ../kind
 
 # Test
+echo "getting todos "
 kubectl get todos
 
 STATUS_CODE=""

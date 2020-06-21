@@ -25,6 +25,7 @@ fi
 # exit
 
 SCRIPT_PATH=$(dirname $0)
+echo $SCRIPT_PATH
 
 if [ $BUILD = 'y' ]; then 
     go mod vendor
@@ -36,3 +37,5 @@ kubectl apply -f "$SCRIPT_PATH/artifacts/crd.yaml"
 kubectl apply -f "$SCRIPT_PATH/artifacts/app.yaml"
 sleep 10
 kubectl apply -f "$SCRIPT_PATH/artifacts/todo.yaml" 
+
+echo "deploy informer completed"

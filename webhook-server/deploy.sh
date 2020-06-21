@@ -31,3 +31,5 @@ export CA_BUNDLE=$(kubectl config view --raw -o json | jq -r '.clusters[] | sele
 kubectl apply -f "$SCRIPT_PATH/artifacts/deployment.yaml"
 kubectl apply -f "$SCRIPT_PATH/artifacts/service.yaml"
 envsubst < "$SCRIPT_PATH/artifacts/webhook-registration-template.yaml" | kubectl apply -f -  
+
+echo "deploy webhook completed"

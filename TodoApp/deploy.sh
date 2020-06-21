@@ -23,3 +23,5 @@ if [ $BUILD = 'y' ]; then
 fi
 kind load docker-image crixo/k8s-as-backend-todo-app:v0.0.0 --name $CLUSTER_NAME --nodes="k8s-as-backend-worker,k8s-as-backend-worker2"
 kubectl apply -f "$SCRIPT_PATH/artifacts/app.yaml"
+
+echo "deploy TodoApp completed"
