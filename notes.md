@@ -98,3 +98,43 @@ then run from the same shell the following command
     github.com/crixo/k8s-as-backend/pkg/client \
     github.com/crixo/k8s-as-backend/pkg/apis k8sasbackend:v1
 ```
+
+## TLS error
+
+### operator-i-cluster
+
+k logs -n kube-system kube-apiserver-k8s-as-backend-control-plane
+W1003 22:46:05.635192       1 dispatcher.go:128] Failed calling webhook, failing open kab01-todos.webhook.example: failed calling webhook "kab01-todos.webhook.example": Post https://kab01-todos-webhook-server.operator-in-cluster.svc:443/crd?timeout=5s: x509: certificate signed by unknown authority
+E1003 22:46:05.635461       1 dispatcher.go:129] failed calling webhook "kab01-todos.webhook.example": Post https://kab01-todos-webhook-server.operator-in-cluster.svc:443/crd?timeout=5s: x509: certificate signed by unknown authority
+
+kubectl get validatingwebhookconfigurations kab-todos -o yaml
+
+missing caBundle why?
+```
+...
+- admissionReviewVersions:
+  - v1beta1
+  clientConfig:
+    service:
+      name: operator-in-cluster-kab01-todos-webhook-server
+      namespace: operator-in-cluster
+      path: /crd
+      port: 443
+  failurePolicy: Ignore
+  matchPolicy: Exact
+  name: operator-in-cluster-kab01-todos.webhook.example
+  namespaceSelector: {}
+  objectSelector: {}
+  rules:
+  - apiGroups:
+    - k8sasbackend.com
+    apiVersions:
+    - v1
+    operations:
+    - '*'
+    resources:
+    - todos
+    scope: Namespaced
+  sideEffects: None
+  timeoutSeconds: 5
+```

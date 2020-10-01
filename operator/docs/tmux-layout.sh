@@ -6,6 +6,18 @@ tmux new -s kab\; split-window -h \; split-window -v  \;
 #C-b "          split vertically (top/bottom)
 #C-b %          split horizontally (left/right)
 
+# Resize pane
+# https://dev.to/michael/resizing-panes-in-tmux-2da7
+# // This assumes that you've hit ctrl + b and : to get to the command prompt
+# :resize-pane -D (Resizes the current pane down by 1 cell)
+# :resize-pane -U (Resizes the current pane upward by 1 cell)
+# :resize-pane -L (Resizes the current pane left by 1 cell)
+# :resize-pane -R (Resizes the current pane right by 1 cell)
+# :resize-pane -D 10 (Resizes the current pane down by 10 cells)
+# :resize-pane -U 10 (Resizes the current pane upward by 10 cells)
+# :resize-pane -L 10 (Resizes the current pane left by 10 cells)
+# :resize-pane -R 10 (Resizes the current pane right by 10 cells)
+
 # search in copy-mode
 #https://superuser.com/questions/231002/how-can-i-search-within-the-output-buffer-of-a-tmux-shell
 #To search in the tmux history buffer for the current window, press Ctrl-b [ to enter copy mode.

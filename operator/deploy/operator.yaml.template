@@ -16,7 +16,7 @@ spec:
       containers:
         - name: operator
           # Replace this with the built image name
-          image: crixo/k8s-as-backend-operator:v0.0.0
+          image: REPLACE_IMAGE
           command:
           - operator
           imagePullPolicy: Always

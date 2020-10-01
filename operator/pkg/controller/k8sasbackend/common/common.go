@@ -35,6 +35,10 @@ func CreateUniqueSecondaryResourceName(i *k8sasbackendv1alpha1.K8sAsBackend, bas
 	return fmt.Sprintf("%s-%s", i.Name, baseName)
 }
 
+func CreateUniqueSecondaryResourceNameWithNs(i *k8sasbackendv1alpha1.K8sAsBackend, baseName string) string {
+	return fmt.Sprintf("%s-%s-%s", i.Namespace, i.Name, baseName)
+}
+
 func CreateMatchingLabels(i *k8sasbackendv1alpha1.K8sAsBackend, baseName string) map[string]string {
 	return map[string]string{
 		"app": CreateUniqueSecondaryResourceName(i, baseName),

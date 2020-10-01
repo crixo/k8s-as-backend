@@ -16,6 +16,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	certv1beta1 "k8s.io/client-go/kubernetes/typed/certificates/v1beta1"
+	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
@@ -47,7 +48,20 @@ func Add(mgr manager.Manager) error {
 // newReconciler returns a new reconcile.Reconciler
 func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 
-	common.AppState.ClientConfig = mgr.GetConfig()
+	inClusterConfig, err := rest.InClusterConfig()
+	if err != nil {
+		log.Info("ClientConfig", "InClusterConfig", err.Error())
+		common.AppState.ClientConfig = mgr.GetConfig()
+	} else {
+		common.AppState.ClientConfig = inClusterConfig
+	}
+
+	if common.AppState.ClientConfig == nil {
+		panic("Unable to load ClientConfig")
+	}
+
+	log.Info("ClientConfig", "ClientConfig.CAData", len(common.AppState.ClientConfig.CAData))
+	log.Info("ClientConfig", "TLSClientConfig.CAFile", common.AppState.ClientConfig.TLSClientConfig.CAFile)
 
 	reconciler := &ReconcileK8sAsBackend{
 		Client: mgr.GetClient(),

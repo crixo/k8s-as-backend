@@ -3,6 +3,7 @@ package webhookserver
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
 	"reflect"
 	"time"
 
@@ -69,8 +70,19 @@ func createValidationWebhook(i *k8sasbackendv1alpha1.K8sAsBackend) arv1beta1.Val
 	scope := arv1beta1.NamespacedScope
 	path := "/crd"
 	sideEffects := arv1beta1.SideEffectClassNone
+	// if operator runs in cluster the following is empty
+	// use cert mounted in pod at /var/run/secrets/kubernetes.io/serviceaccount//ca.crt
 	caBundle := common.AppState.ClientConfig.CAData
-	todosWebhookName := common.CreateUniqueSecondaryResourceName(i, todosWebhookBaseName)
+	if len(caBundle) == 0 {
+		dat, err := ioutil.ReadFile(common.AppState.ClientConfig.TLSClientConfig.CAFile)
+		if err != nil {
+			panic("Unable to read CAFile")
+		}
+		caBundle = dat
+	}
+
+	// create unique name instead of "kab01-todos.webhook.example" should also contain the NS
+	todosWebhookName := common.CreateUniqueSecondaryResourceNameWithNs(i, todosWebhookBaseName)
 	var timeout int32 = 5
 	serviceName := common.CreateUniqueSecondaryResourceName(i, baseName)
 	return arv1beta1.ValidatingWebhook{

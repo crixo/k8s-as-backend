@@ -5,6 +5,12 @@
 openssl req -in ~/Coding/golang/k8s-as-backend/operator/server-test.csr -noout -text
 ```
 
+open cert
+```
+openssl x509 -in ~/Desktop/k8s/kab01_operator-in-cluster_cert.pem -noout -text
+```
+
+
 ### Verifying that a Certificate is issued by a CA
 How to use OpenSSL on the command line to verify that a certificate was issued by a specific CA, given that CA's certificate
 ```

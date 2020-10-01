@@ -35,7 +35,7 @@ sh create-cluster.sh
 sh deploy.sh k8s-as-backend y
 ```
 
-with the operator using the e2e test framework with not clean-ip
+with the operator using the e2e test framework with not clean-up
 ```
 cd operator
 
@@ -47,6 +47,12 @@ with a running operator
 cd operator
 
 sh deploy-with-running-operator.sh
+```
+then open an other terminal and run the following once the previous terminal is idling
+```
+cd operator
+kubectl config set-context --current --namespace operator-running
+kubectl apply -f deploy/crds/kab01.yaml
 ```
 
 
@@ -69,6 +75,9 @@ Project resources dependencies vs operator scope
 - [Admission Webhook server sample](https://github.com/kubernetes/kubernetes/tree/v1.16.11/test/images/agnhost#webhook-kubernetes-external-admission-webhook)
 - [Banzai Tutorial](https://banzaicloud.com/blog/k8s-admission-webhooks/)
 
+### Reconcile loop theory
+- [Thinking Systems](https://www.amazon.it/Thinking-Systems-Donella-H-Meadows/dp/1603580557)
+
 ### Multi-container POD patterns
 
 - [The Distributed System ToolKit: Patterns for Composite Containers](https://kubernetes.io/blog/2015/06/the-distributed-system-toolkit-patterns/)
@@ -85,6 +94,12 @@ Project resources dependencies vs operator scope
 
 - [Pinning k8s subcomponents with go mod](https://medium.com/@cristiano.deg/pinning-k8s-subcomponents-with-go-mod-1ad087731f83)
 - [Kubernetes Bar appointment](https://www.youtube.com/watch?v=vD47LRy23Ag)
+
+### Public talks
+
+- [Kubernetes the Deltatre way: Kubernetes CRD & Operators](https://www.youtube.com/watch?v=8YNH1QZGdMM)
+
+- [ContainerDay 2020: Kubernetes CRD & Operators](https://2020.containerday.it/)
 
 ## Collaboration
 My current skills on *golang* are very limited. Any contribution to speed up the implementation, suggestions aimed to improve the quality of the code and the repo organization are more then welcome.

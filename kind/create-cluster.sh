@@ -11,6 +11,10 @@ nginxctrlimage='quay.io/kubernetes-ingress-controller/nginx-ingress-controller:m
 docker pull $nginxctrlimage
 kind load docker-image $nginxctrlimage --name $CLUSTER_NAME --nodes='k8s-as-backend-control-plane'
 
+httpechoImage='hashicorp/http-echo'
+docker pull $httpechoImage
+kind load docker-image $httpechoImage --name $CLUSTER_NAME --nodes='k8s-as-backend-worker,k8s-as-backend-worker2'
+
 kubectl apply -f mandatory.yaml
 kubectl apply -f service-nodeport.yaml
 kubectl patch deployments -n ingress-nginx nginx-ingress-controller --patch "$(cat nginx-ingress-controller-deployment-patch.yaml)"
