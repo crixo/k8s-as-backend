@@ -22,6 +22,7 @@ fi
 kubectl apply -f deploy/crds/k8s-as-backend.example.com_k8sasbackends_crd.yaml
 
 kubectl create namespace $NS
+kubectl label namespaces $NS ns=$NS
 
 echo "Open a new terminal"
 

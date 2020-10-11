@@ -50,6 +50,10 @@ You need at least a set of new PEM anytime you create a new k8s cluster. PEM cle
 ```
 kubectl create namespace operator-running
 ```
+add a label used by admission webhook filtering the resource to be verified
+```
+kubectl label namespaces operator-running ns=operator-running
+```
 
 - Start the operator app. The app will be in interactive mode sending logs to stdout
 ```

@@ -108,6 +108,11 @@ func createDeployment(resNamespacedName types.NamespacedName, i *k8sasbackendv1a
 									},
 								},
 							},
+							{
+								//TODO: modify C# TodoApp using this var to create the todo resource for the api-server
+								Name:  "OPERATOR_NAME",
+								Value: i.Name,
+							},
 						},
 					},
 						{

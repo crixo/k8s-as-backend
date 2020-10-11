@@ -12,6 +12,7 @@ import (
 	common "github.com/crixo/k8s-as-backend/operator/pkg/controller/k8sasbackend/common"
 	arv1beta1 "k8s.io/api/admissionregistration/v1beta1"
 	"k8s.io/apimachinery/pkg/api/errors"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
@@ -96,6 +97,16 @@ func createValidationWebhook(i *k8sasbackendv1alpha1.K8sAsBackend) arv1beta1.Val
 			},
 			Operations: []arv1beta1.OperationType{"*"},
 		}},
+		NamespaceSelector: &v1.LabelSelector{
+			MatchLabels: map[string]string{
+				"ns": i.Namespace,
+			},
+		},
+		ObjectSelector: &v1.LabelSelector{
+			MatchLabels: map[string]string{
+				"operator": i.Name,
+			},
+		},
 		ClientConfig: arv1beta1.WebhookClientConfig{
 			Service: &arv1beta1.ServiceReference{
 				Namespace: i.Namespace,
