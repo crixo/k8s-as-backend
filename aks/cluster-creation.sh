@@ -7,9 +7,10 @@ fi
 
 export AKS_CLUSTER_NAME=$CLUSTER_NAME
 export AZURE_SUBSCRIPTION_ID="d9e06499-49d3-4d60-b301-3ff03e019bb7" #vs
-export AZURE_RESOURCE_GROUP="test-cri"
+export AZURE_RESOURCE_GROUP="k8s-as-backend"
 export AZURE_REGION="westeurope"
 export DNSNAME="demo-k8s-as-backend" # FQDN will then be DNSNAME.ZONE.cloudapp.azure.com
+export K8S_VERSION="1.16.15"
 
 az login
 az account set -s $AZURE_SUBSCRIPTION_ID
@@ -17,6 +18,7 @@ az group create -l $AZURE_REGION -n $AZURE_RESOURCE_GROUP
 az aks create \
     --resource-group $AZURE_RESOURCE_GROUP \
     --name $AKS_CLUSTER_NAME \
+    --kubernetes-version=$K8S_VERSION
     --node-count 2 \
     --load-balancer-sku standard \
     --node-vm-size Standard_B2s \
@@ -36,7 +38,7 @@ envsubst < cloud-generic.yaml | kubectl apply -f -
 kubectl get service --namespace ingress-nginx
 kubectl get pods --namespace ingress-nginx
 
-exit
+# exit
 
 export DNSNAME="demo-k8s-as-backend" # FQDN will then be DNSNAME.ZONE.cloudapp.azure.com
 PUBLICIPID=$(az network public-ip list --query "[?ipAddress!=null]|[?contains(ipAddress, '$PUBLIC_STATIC_IP')].[id]" --output tsv)

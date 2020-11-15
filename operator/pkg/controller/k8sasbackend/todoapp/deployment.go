@@ -45,6 +45,14 @@ func createDeployment(resNamespacedName types.NamespacedName, i *k8sasbackendv1a
 	var replicas int32 = i.Spec.Size
 	matchingLabels := common.CreateMatchingLabels(i, BaseName)
 	serviceAccountName := common.CreateUniqueSecondaryResourceName(i, authz.BaseName)
+	schema := "http"
+	host := "localhost"
+	if ingressHost != "" {
+		schema = "https"
+		host = ingressHost
+	}
+	relativeBasePath := common.TrimFirstRune(getAppBaseUrl(i)) //todoAppUrlSegmentIdentifier,
+	fullBasePath := fmt.Sprintf("%s://%s/%s", schema, host, relativeBasePath)
 	return &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      resNamespacedName.Name,
@@ -73,7 +81,7 @@ func createDeployment(resNamespacedName types.NamespacedName, i *k8sasbackendv1a
 							//TODO: create env variable mapping the meta.namespace to have the api calling the ralted ns while is creating the todo-CR
 							{
 								Name:  "FullBasePath",
-								Value: fmt.Sprintf("http://localhost%s", getAppBaseUrl(i)),
+								Value: fullBasePath,
 							},
 							{
 								Name:  "RoutePrefix",
@@ -81,7 +89,7 @@ func createDeployment(resNamespacedName types.NamespacedName, i *k8sasbackendv1a
 							},
 							{
 								Name:  "RelativeBasePath",
-								Value: common.TrimFirstRune(getAppBaseUrl(i)), //todoAppUrlSegmentIdentifier,
+								Value: relativeBasePath,
 							},
 							{
 								Name:  "UseSwagger",

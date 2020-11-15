@@ -45,7 +45,7 @@ func createIngress(resNamespacedName types.NamespacedName, i *k8sasbackendv1alph
 		},
 		Spec: extv1beta1.IngressSpec{
 			Rules: []extv1beta1.IngressRule{
-				getRule("", path, backend),
+				getRule(ingressHost, path, backend),
 			},
 		},
 	}

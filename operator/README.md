@@ -186,6 +186,20 @@ browse the [todo app](http://localhost/operator-in-cluster/kab01/todo-app/swagge
 
 - Side by Side apps: compare app managed by [local operator](http://localhost/operator-running/kab01/todo-app/swagger-ui/index.html) vs app managed by [operator in cluster](http://localhost/operator-in-cluster/kab01/todo-app/swagger-ui/index.html)
 
+## Deploy operator on AKS
+
+- Create AKS cluster
+```
+cd ../aks
+sh aks/cluster-creation.sh
+
+# make sure you are mactching the expected product version 
+# see env var OPERATOR_IMAGE_NAME and productVersion within deploy/kab01.yaml
+sh aks/aks-deploy-operator.sh 
+```
+
+- browse the [todo app](https://demo-k8s-as-backend.westeurope.cloudapp.azure.com/operator-in-cluster/kab01/todo-app/swagger-ui/index.html) in AKS
+
 
 ## Notes
 The images on docker hub may not be up to date. Use the specific folder at root level to build the latest version of the images.
