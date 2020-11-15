@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kab-operator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: kab-operator
+  template:
+    metadata:
+      labels:
+        name: kab-operator
+    spec:
+      serviceAccountName: kab-operator
+      containers:
+        - name: operator
+          # Replace this with the built image name
+          image: ${OPERATOR_IMAGE_NAME}
+          command:
+          - operator
+          imagePullPolicy: Always
+          env:
+            - name: WATCH_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: OPERATOR_NAME
+              value: "kab-operator"
+            - name: INGRESS_HOST
+              value: "${INGRESS_HOST}"

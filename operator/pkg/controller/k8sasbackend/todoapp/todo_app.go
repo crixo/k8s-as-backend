@@ -24,6 +24,7 @@ var (
 	todoPort                    int         = 80
 	kubectlApiPort              int32       = 8080
 	log                         logr.Logger = common.Log
+	ingressHost                             = common.GetEnv("INGRESS_HOST", "")
 	//caBundle []byte      = common.AppState.ClientConfig.CAData
 )
 

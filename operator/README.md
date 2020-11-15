@@ -7,6 +7,8 @@ you have to install the following dependencies
 - [kind](https://kind.sigs.k8s.io/) The *right way* to have k8s locally - v0.6.0 w/ k8s image v1.16.3
 - [golang 1.13`*`](https://golang.org/doc/install) *THE* k8s programming language
 - [operator-SDK`*`](https://github.com/operator-framework/operator-sdk) - v0.15.2 The framework selected to build k8s operator
+- [envsubst](https://github.com/a8m/envsubst) (GNU gettext-runtime) 0.20.2 - for templating/env var replacing within plain yaml files.
+para- [jq](https://stedolan.github.io/jq/) version 1.6 - lightweight and flexible command-line JSON processor.
 
 `*` required only to simplify development and debugging activities. The final solution, as per [operator pattern](https://kubernetes.io/docs/concepts/extend-kubernetes/operator/), runs within a docker container inside the k8s cluster. 
 
@@ -146,6 +148,7 @@ operator-sdk build crixo/k8s-as-backend-operator:v0.0.0
 sed 's|REPLACE_IMAGE|crixo/k8s-as-backend-operator:v0.0.0|g' deploy/operator.yaml.template > deploy/operator.yaml
 docker push crixo/k8s-as-backend-operator:v0.0.0
 ```
+
 - Deploy operator CRD 
 ```
 kubectl apply -f deploy/crds/k8s-as-backend.example.com_k8sasbackends_crd.yaml
@@ -185,6 +188,23 @@ browse the [todo app](http://localhost/operator-in-cluster/kab01/todo-app/swagge
 - [operator CR/instance by namespace and name](http://127.0.0.1:8001/apis/k8s-as-backend.example.com/v1alpha1/namespaces/operator-in-cluster/k8sasbackends/kab01)
 
 - Side by Side apps: compare app managed by [local operator](http://localhost/operator-running/kab01/todo-app/swagger-ui/index.html) vs app managed by [operator in cluster](http://localhost/operator-in-cluster/kab01/todo-app/swagger-ui/index.html)
+
+## Deploy operator on AKS
+
+- Create AKS cluster
+starting from the repo root
+```
+cd aks
+DNSNAME="operator-demo"
+sh cluster-creation.sh "cluster-operator-demo" $DNSNAME
+sh aks-operator-deploy.sh "operator-in-cluster" $DNSNAME
+```
+The ```cluster-creation.sh``` includes the [letsecrypt integration](https://cert-manager.io/docs/configuration/acme/). The [staging] evenviroment has been integrated within the script. To have a full browser experience, you have to [download](https://letsencrypt.org/docs/staging-environment/) and install the related Certification Authority
+``` macOS
+sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain <certificate>
+````
+
+- browse the [todo app](https://operator-demo.westeurope.cloudapp.azure.com/operator-in-cluster/kab01/todo-app/swagger-ui/index.html) in AKS
 
 
 ## Notes

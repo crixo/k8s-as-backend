@@ -1,0 +1,28 @@
+# https://medium.com/flant-com/cert-manager-lets-encrypt-ssl-certs-for-kubernetes-7642e463bbce
+#envsubst < le-ingress.yaml | kubectl apply -n default -f - 
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: example-ingress
+  annotations:
+    ingress.kubernetes.io/rewrite-target: /
+    cert-manager.io/cluster-issuer: letsencrypt-staging
+spec:
+  tls:
+  - hosts:
+    #- "yet-another.website"
+    - "${DNSNAME}.${AZURE_REGION}.cloudapp.azure.com"
+    secretName: tls-secret
+  rules:
+  #- host: "yet-another.website"
+  - host: ${DNSNAME}.${AZURE_REGION}.cloudapp.azure.com
+    http:
+      paths:
+      - path: /foo
+        backend:
+          serviceName: foo-service
+          servicePort: 5678
+      - path: /bar
+        backend:
+          serviceName: bar-service
+          servicePort: 5678

@@ -66,7 +66,9 @@ namespace TodoApi
                         {
                             swaggerDoc.Servers = new List<OpenApiServer> { 
                                 new OpenApiServer { 
-                                    Url = $"{httpReq.Scheme}://{httpReq.Host.Value}/{relativeBasePath}" 
+                                    // TODO: use fullBasePath otherwise schema is always http due to loopback interface call
+                                    //Url = $"{httpReq.Scheme}://{httpReq.Host.Value}/{relativeBasePath}" 
+                                    Url = $"{fullBasePath}" 
                                     } };
                         });
                     }

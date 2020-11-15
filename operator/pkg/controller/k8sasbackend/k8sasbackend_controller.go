@@ -32,6 +32,7 @@ var (
 	todoApp             *todoapp.TodoApp
 	log                 logr.Logger = common.Log
 	pemFolder                       = common.GetEnv("PEM_FOLDER", os.TempDir()) //pflag.String("pem-folder", "/tmp", "Folder where pem files will be stored during the container lifetime")
+	//ingressHost                     = common.GetEnv("INGRESS_HOST", "")
 )
 
 /**

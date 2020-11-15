@@ -1,0 +1,8 @@
+apiVersion: k8s-as-backend.example.com/v1alpha1
+kind: K8sAsBackend
+metadata:
+  name: kab02
+spec:
+  # Add fields here
+  size: 1
+  productVersion: "v0.0.0"

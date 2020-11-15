@@ -101,5 +101,7 @@ Project resources dependencies vs operator scope
 
 - [ContainerDay 2020: Kubernetes CRD & Operators](https://2020.containerday.it/)
 
+- [TechItalia Tuscany: Kubecon TechItalia online Meetup](https://www.meetup.com/TechItaliaTuscany/events/274381698/)
+
 ## Collaboration
 My current skills on *golang* are very limited. Any contribution to speed up the implementation, suggestions aimed to improve the quality of the code and the repo organization are more then welcome.
