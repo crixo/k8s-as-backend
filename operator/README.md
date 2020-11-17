@@ -7,6 +7,7 @@ you have to install the following dependencies
 - [kind](https://kind.sigs.k8s.io/) The *right way* to have k8s locally - v0.6.0 w/ k8s image v1.16.3
 - [golang 1.13`*`](https://golang.org/doc/install) *THE* k8s programming language
 - [operator-SDK`*`](https://github.com/operator-framework/operator-sdk) - v0.15.2 The framework selected to build k8s operator
+- [envsubst](https://github.com/a8m/envsubst) (GNU gettext-runtime) 0.20.2 - for templating/env var replacing within plain yaml files.
 
 `*` required only to simplify development and debugging activities. The final solution, as per [operator pattern](https://kubernetes.io/docs/concepts/extend-kubernetes/operator/), runs within a docker container inside the k8s cluster. 
 
@@ -146,6 +147,7 @@ operator-sdk build crixo/k8s-as-backend-operator:v0.0.0
 sed 's|REPLACE_IMAGE|crixo/k8s-as-backend-operator:v0.0.0|g' deploy/operator.yaml.template > deploy/operator.yaml
 docker push crixo/k8s-as-backend-operator:v0.0.0
 ```
+
 - Deploy operator CRD 
 ```
 kubectl apply -f deploy/crds/k8s-as-backend.example.com_k8sasbackends_crd.yaml
@@ -190,13 +192,25 @@ browse the [todo app](http://localhost/operator-in-cluster/kab01/todo-app/swagge
 
 - Create AKS cluster
 ```
-cd ../aks
-sh aks/cluster-creation.sh
-
-# make sure you are mactching the expected product version 
-# see env var OPERATOR_IMAGE_NAME and productVersion within deploy/kab01.yaml
-sh aks/aks-deploy-operator.sh 
+cd operator
+sh ../aks/cluster-creation.sh
 ```
+
+- Deploy operator CRD (see above)
+
+- Create and configure namespace for this demo (see above)
+
+- Deploy RBAC (see above)
+
+- Deploy the operator app within the AKS cluster
+```
+# see env var OPERATOR_IMAGE_NAME and productVersion within deploy/kab01.yaml
+# for simplicity I always use the v0.0.0 but you should use a specific version according for eg. to the various git tag
+# not using the latest image tag to simplify interaction when I'm using kind
+sh ../aks/aks-deploy-operator.sh 
+```
+
+- Deploy the operator CR (see above)
 
 - browse the [todo app](https://demo-k8s-as-backend.westeurope.cloudapp.azure.com/operator-in-cluster/kab01/todo-app/swagger-ui/index.html) in AKS
 
