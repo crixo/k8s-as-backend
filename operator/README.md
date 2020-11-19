@@ -191,9 +191,15 @@ browse the [todo app](http://localhost/operator-in-cluster/kab01/todo-app/swagge
 ## Deploy operator on AKS
 
 - Create AKS cluster
+starting from the repo root
 ```
-cd operator
-sh ../aks/cluster-creation.sh
+cd aks
+sh cluster-creation.sh
+```
+
+- move to operator folder
+```
+cd ../operator
 ```
 
 - Deploy operator CRD (see above)
@@ -207,7 +213,7 @@ sh ../aks/cluster-creation.sh
 # see env var OPERATOR_IMAGE_NAME and productVersion within deploy/kab01.yaml
 # for simplicity I always use the v0.0.0 but you should use a specific version according for eg. to the various git tag
 # not using the latest image tag to simplify interaction when I'm using kind
-sh ../aks/aks-deploy-operator.sh 
+sh ../aks/aks-deploy-operator.sh  
 ```
 
 - Deploy the operator CR (see above)

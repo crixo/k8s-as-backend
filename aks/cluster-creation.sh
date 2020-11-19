@@ -18,13 +18,14 @@ az group create -l $AZURE_REGION -n $AZURE_RESOURCE_GROUP
 az aks create \
     --resource-group $AZURE_RESOURCE_GROUP \
     --name $AKS_CLUSTER_NAME \
-    --kubernetes-version=$K8S_VERSION
+    --kubernetes-version=$K8S_VERSION \
     --node-count 2 \
     --load-balancer-sku standard \
     --node-vm-size Standard_B2s \
     --vm-set-type VirtualMachineScaleSets \
-    #--node-osdisk-size 30 \
     --generate-ssh-keys
+    #--node-osdisk-size 30 \
+
 az aks get-credentials --resource-group $AZURE_RESOURCE_GROUP --name $AKS_CLUSTER_NAME
 
 CLUSTER_RG=$(az aks show --resource-group $AZURE_RESOURCE_GROUP --name $AKS_CLUSTER_NAME --query nodeResourceGroup -o tsv)
@@ -46,6 +47,13 @@ PUBLICIPID=$(az network public-ip list --query "[?ipAddress!=null]|[?contains(ip
 az network public-ip update --ids $PUBLICIPID --dns-name $DNSNAME
 
 envsubst < usage.yaml | kubectl apply -f - 
+
+## install cert-manager + letsecrypt
+kubectl create ns cert-manager
+kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v0.13.0/cert-manager.yaml
+sleep 10
+kubectl apply -f le-cluster-issuer.yaml
+envsubst < le-ingress.yaml | kubectl apply -f - 
 
 echo "DONE!"
 

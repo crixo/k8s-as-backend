@@ -2,7 +2,8 @@
 apiVersion: cert-manager.io/v1alpha2
 kind: ClusterIssuer
 metadata:
-  name: letsencrypt-staging
+  #name: letsencrypt-staging
+  name: letsencrypt
 spec:
   acme:
     # You must replace this email address with your own.
