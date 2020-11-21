@@ -197,7 +197,13 @@ cd aks
 sh cluster-creation.sh
 ```
 
-- move to operator folder
+- deploy operator in one shot
+```
+# use defualt NS
+sh aks-operator-deploy.sh 
+```
+
+- OR do it step by step. Move to operator folder
 ```
 cd ../operator
 ```

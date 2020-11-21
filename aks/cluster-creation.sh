@@ -51,8 +51,20 @@ envsubst < usage.yaml | kubectl apply -f -
 ## install cert-manager + letsecrypt
 kubectl create ns cert-manager
 kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v0.13.0/cert-manager.yaml
-sleep 10
+# if returns the following error
+# Error from server (InternalError): error when creating "le-cluster-issuer.yaml": 
+# Internal error occurred: failed calling webhook "webhook.cert-manager.io": 
+# Post https://cert-manager-webhook.cert-manager.svc:443/mutate?timeout=30s: 
+# dial tcp 10.0.78.42:443: connect: connection refused
+# try to apply it againg until you are able to get the resource
+# k get clusterissuers.cert-manager.io 
+# NAME          READY   AGE
+# letsencrypt   True    4s
+sleep 20
 kubectl apply -f le-cluster-issuer.yaml
+sleep 20
+kubectl apply -f le-cluster-issuer.yaml
+kubectl get clusterissuers.cert-manager.io  
 envsubst < le-ingress.yaml | kubectl apply -f - 
 
 echo "DONE!"
