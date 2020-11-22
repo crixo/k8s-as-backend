@@ -8,6 +8,7 @@ you have to install the following dependencies
 - [golang 1.13`*`](https://golang.org/doc/install) *THE* k8s programming language
 - [operator-SDK`*`](https://github.com/operator-framework/operator-sdk) - v0.15.2 The framework selected to build k8s operator
 - [envsubst](https://github.com/a8m/envsubst) (GNU gettext-runtime) 0.20.2 - for templating/env var replacing within plain yaml files.
+para- [jq](https://stedolan.github.io/jq/) version 1.6 - lightweight and flexible command-line JSON processor.
 
 `*` required only to simplify development and debugging activities. The final solution, as per [operator pattern](https://kubernetes.io/docs/concepts/extend-kubernetes/operator/), runs within a docker container inside the k8s cluster. 
 
@@ -194,37 +195,12 @@ browse the [todo app](http://localhost/operator-in-cluster/kab01/todo-app/swagge
 starting from the repo root
 ```
 cd aks
-sh cluster-creation.sh
+DNSNAME="operator-demo"
+sh cluster-creation.sh "cluster-operator-demo" $DNSNAME
+sh aks-operator-deploy.sh "operator-in-cluster" $DNSNAME
 ```
 
-- deploy operator in one shot
-```
-# use defualt NS
-sh aks-operator-deploy.sh 
-```
-
-- OR do it step by step. Move to operator folder
-```
-cd ../operator
-```
-
-- Deploy operator CRD (see above)
-
-- Create and configure namespace for this demo (see above)
-
-- Deploy RBAC (see above)
-
-- Deploy the operator app within the AKS cluster
-```
-# see env var OPERATOR_IMAGE_NAME and productVersion within deploy/kab01.yaml
-# for simplicity I always use the v0.0.0 but you should use a specific version according for eg. to the various git tag
-# not using the latest image tag to simplify interaction when I'm using kind
-sh ../aks/aks-deploy-operator.sh  
-```
-
-- Deploy the operator CR (see above)
-
-- browse the [todo app](https://demo-k8s-as-backend.westeurope.cloudapp.azure.com/operator-in-cluster/kab01/todo-app/swagger-ui/index.html) in AKS
+- browse the [todo app](https://operator-demo.westeurope.cloudapp.azure.com/operator-in-cluster/kab01/todo-app/swagger-ui/index.html) in AKS
 
 
 ## Notes

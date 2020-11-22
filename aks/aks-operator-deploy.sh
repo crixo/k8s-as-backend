@@ -1,9 +1,24 @@
-export NS="operator-in-cluster"
+export NS=$1
+export DNSNAME=$2
 
-read -r -p "namespace(operator-in-cluster): " NS
+#echo "NS: $NS - DNSNAME: $DNSNAME"
+
 if [ -z "$NS" ]; then 
-    NS="operator-in-cluster"
+    read -r -p "namespace(operator-in-cluster): " NS
+    if [ -z "$NS" ]; then 
+        NS="operator-in-cluster"
+    fi
 fi
+
+if [ -z "$DNSNAME" ]; then 
+    read -r -p "dns name(demo-k8s-as-backend): " DNSNAME
+    if [ -z "$DNSNAME" ]; then 
+        DNSNAME="demo-k8s-as-backend"
+    fi
+fi
+
+#echo "NS: $NS - DNSNAME: $DNSNAME"
+#exit
 
 cd ../operator
 
@@ -21,7 +36,7 @@ envsubst < deploy/cluster_role_binding_cluster_admin-with-var.yaml | kubectl app
 
 # Deploy operator
 export OPERATOR_IMAGE_NAME="crixo/k8s-as-backend-operator:v0.0.0"
-export INGRESS_HOST="demo-k8s-as-backend.westeurope.cloudapp.azure.com"
+export INGRESS_HOST="$DNSNAME.westeurope.cloudapp.azure.com"
 envsubst < deploy/operator-envsubst.yaml | kubectl apply -f - 
 
 # Deploy the operator CR IOW your solution/app instance
