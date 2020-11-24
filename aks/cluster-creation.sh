@@ -75,7 +75,7 @@ kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/relea
 cic=0
 while [ $cic -eq 0 ]
 do
-    kubectl apply -f le-cluster-issuer.yaml
+    kubectl apply -f le-cluster-issuer-staging.yaml
     cic=$(kubectl get clusterissuers.cert-manager.io -o json | jq '.items | length')
     echo "clusterissuers: $cic"
 done
