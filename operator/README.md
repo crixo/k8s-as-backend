@@ -199,6 +199,10 @@ DNSNAME="operator-demo"
 sh cluster-creation.sh "cluster-operator-demo" $DNSNAME
 sh aks-operator-deploy.sh "operator-in-cluster" $DNSNAME
 ```
+The ```cluster-creation.sh``` includes the [letsecrypt integration](https://cert-manager.io/docs/configuration/acme/). The [staging] evenviroment has been integrated within the script. To have a full browser experience, you have to [download](https://letsencrypt.org/docs/staging-environment/) and install the related Certification Authority
+``` macOS
+sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain <certificate>
+````
 
 - browse the [todo app](https://operator-demo.westeurope.cloudapp.azure.com/operator-in-cluster/kab01/todo-app/swagger-ui/index.html) in AKS
 
